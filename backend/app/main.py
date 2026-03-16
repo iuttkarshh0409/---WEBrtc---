@@ -1,0 +1,57 @@
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from .database import engine, Base
+from .routes.rooms import router as rooms_router
+from .websocket.signaling import manager
+import json
+
+# Create the DB tables (Usually done with Alembic, but Base.metadata is fine for MVP)
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="WebRTC Collaboration Platform")
+
+# Allow requests from the React frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Register REST Routes
+app.include_router(rooms_router)
+
+@app.get("/")
+def home():
+    return {"message": "Welcome to WebRTC Collaboration MVP Backend Target"}
+
+# WebSocket Endpoint for Signaling
+@app.websocket("/ws/{room_id}")
+async def websocket_signaling(websocket: WebSocket, room_id: str):
+    await manager.connect(websocket, room_id)
+    try:
+        while True:
+            # We receive text messages from peers
+            # The structure of `data` typically looks like:
+            # {
+            #    "type": "offer" | "answer" | "ice-candidate",
+            #    "from": "user_id_A",
+            #    "to": "user_id_B",
+            #    ... (sdp or candidate data)
+            # }
+            data = await websocket.receive_text()
+            
+            # The signaling server's job is minimal: Just forward messages to peers
+            # Peer-to-Peer messages can be broadcasted or sent specifically if tracked,
+            # but for a simple chatroom, broadcasting them explicitly suffices, provided
+            # peers ignore offers/answers not intended for them (by filtering `to`).
+            await manager.broadcast(room_id, data, exclude=websocket)
+
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, room_id)
+        # Notify remaining peers that someone disconnected
+        await manager.broadcast(room_id, json.dumps({
+            "type": "peer-disconnected",
+            "message": "A peer disconnected."
+        }))
