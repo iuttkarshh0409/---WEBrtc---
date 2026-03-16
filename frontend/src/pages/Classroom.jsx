@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import './Classroom.css';
 
 export default function Classroom() {
   const { roomId } = useParams();
@@ -9,7 +10,7 @@ export default function Classroom() {
   const navigate = useNavigate();
 
   const [localStream, setLocalStream] = useState(null);
-  const [remoteStreams, setRemoteStreams] = useState([]);
+  const [remoteStreams, setRemoteStreams] = useState([]); // [{ peerId, stream, name }]
   const [participants, setParticipants] = useState([name]);
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
@@ -46,9 +47,33 @@ export default function Classroom() {
     // Abstracting functions out to prevent closure stale state, using Refs heavily
     const setupDataChannel = (channel, peerId) => {
       dataChannelsRef.current[peerId] = channel;
-      channel.onopen = () => console.log('Data channel open for', peerId);
+      
+      channel.onopen = () => {
+        console.log('Data channel open for', peerId);
+        channel.send(JSON.stringify({ type: 'name-metadata', name: name }));
+      };
+
       channel.onmessage = (event) => {
-        setMessages(prev => [...prev, { from: `Peer`, text: event.data }]);
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'name-metadata') {
+             setRemoteStreams(prev => prev.map(item => 
+               item.peerId === peerId ? { ...item, name: data.name } : item
+             ));
+             setParticipants(prev => {
+                const genericName = `Participant ${peerId.slice(-4)}`;
+                const otherNames = prev.filter(p => p !== genericName && p !== name);
+                if (!otherNames.includes(data.name)) {
+                   return [name, ...otherNames, data.name].sort();
+                }
+                return prev;
+             });
+          } else if (data.type === 'chat') {
+             setMessages(prev => [...prev, { from: 'Peer', text: data.text }]);
+          }
+        } catch (e) {
+          setMessages(prev => [...prev, { from: 'Peer', text: event.data }]);
+        }
       };
     };
 
@@ -74,12 +99,13 @@ export default function Classroom() {
       pc.ontrack = (event) => {
         const remoteStream = event.streams[0];
         setRemoteStreams(prev => {
-          if (prev.some(s => s.id === remoteStream.id)) return prev;
-          return [...prev, remoteStream];
+          if (prev.some(s => s.peerId === peerId)) return prev;
+          return [...prev, { peerId, stream: remoteStream, name: `Participant ${peerId.slice(-4)}` }];
         });
         setParticipants(prev => {
           const newParticipant = `Participant ${peerId.slice(-4)}`;
-          return prev.includes(newParticipant) ? prev : [...prev, newParticipant];
+          if (prev.includes(newParticipant) || prev.includes(name)) return prev;
+          return [...prev, newParticipant].sort();
         });
       };
 
@@ -206,7 +232,7 @@ export default function Classroom() {
     // Send to all connected data channels
     Object.values(dataChannelsRef.current).forEach(channel => {
       if (channel.readyState === 'open') {
-        channel.send(chatInput);
+        channel.send(JSON.stringify({ type: 'chat', text: chatInput }));
       }
     });
 
@@ -273,11 +299,11 @@ export default function Classroom() {
   };
 
   return (
-    <div className="container-fluid min-vh-100 d-flex flex-column py-3" style={{ background: '#121212', color: '#ffffff' }}>
-      <header className="d-flex justify-content-between align-items-center mb-4 px-3">
-        <h3 className="m-0 fw-bold text-light d-flex align-items-center">
+    <div className="classroom-container container-fluid d-flex flex-column py-4 px-4">
+      <header className="d-flex justify-content-between align-items-center mb-4">
+        <h3 className="m-0 fw-bold d-flex align-items-center">
           <span>Classroom</span>
-          <span className="text-secondary fs-6 fw-normal ms-2 bg-black bg-opacity-50 px-2 py-1 rounded border border-secondary shadow-sm">
+          <span className="text-secondary fs-6 fw-normal ms-2 bg-black bg-opacity-30 px-2 py-1 rounded border border-secondary shadow-sm">
             #{roomId}
           </span>
           <button 
@@ -289,105 +315,83 @@ export default function Classroom() {
             <i className={`bi ${copied ? 'bi-check-circle-fill' : 'bi-clipboard'}`}></i>
           </button>
         </h3>
-        <div>
-          <span className="badge bg-primary fs-6 py-2 px-3 fw-normal shadow-sm">Role: {role}</span>
-        </div>
+        <span className="badge bg-primary fs-6 py-2 px-3 fw-normal shadow-sm">Role: {role}</span>
       </header>
 
-      <div className="row flex-grow-1 gy-3 px-3">
-        {/* Main Video Area */}
-        <div className="col-12 col-lg-8 d-flex flex-column gap-3">
-          <div className="row row-cols-1 row-cols-md-2 g-3 flex-grow-1">
+      <div className="row flex-grow-1 gy-3">
+        {/* Main Video Grid */}
+        <div className="col-12 col-lg-8 d-flex flex-column">
+          <div className="row row-cols-1 row-cols-md-2 g-3 flex-grow-1 align-items-stretch">
             {/* Local Video */}
-            <div className="col h-100 position-relative">
-              <div className="bg-dark rounded-4 overflow-hidden shadow h-100 position-relative border border-secondary" style={{ minHeight: '300px' }}>
+            <div className="col position-relative" style={{ minHeight: '300px' }}>
+              <div className="bg-dark rounded-4 overflow-hidden shadow-lg h-100 position-relative border border-secondary border-opacity-25">
                 <video ref={localVideoRef} autoPlay playsInline muted 
                   className="w-100 h-100 position-absolute top-0 start-0" style={{ objectFit: 'cover' }} />
-                <div className="position-absolute bottom-0 start-0 m-3 bg-black bg-opacity-75 px-3 py-1 rounded-pill small">
+                <div className="position-absolute bottom-0 start-0 m-3 bg-black bg-opacity-70 px-3 py-1 rounded-pill small border border-secondary border-opacity-25">
                   {name} (Me)
                 </div>
               </div>
             </div>
 
             {/* Remote Videos */}
-            {remoteStreams.map((stream, idx) => (
-              <div key={stream.id || idx} className="col h-100 position-relative">
-                <div className="bg-dark rounded-4 overflow-hidden shadow h-100 position-relative border border-secondary" style={{ minHeight: '300px' }}>
+            {remoteStreams.map((item, idx) => (
+              <div key={item.stream.id || idx} className="col position-relative" style={{ minHeight: '300px' }}>
+                <div className="bg-dark rounded-4 overflow-hidden shadow-lg h-100 position-relative border border-secondary border-opacity-25">
                   <video 
                     autoPlay 
                     playsInline 
                     className="w-100 h-100 position-absolute top-0 start-0" 
                     style={{ objectFit: 'cover' }}
                     ref={video => {
-                      if (video && video.srcObject !== stream) {
-                        video.srcObject = stream;
+                      if (video && video.srcObject !== item.stream) {
+                        video.srcObject = item.stream;
                       }
                     }}
                   />
-                  <div className="position-absolute bottom-0 start-0 m-3 bg-black bg-opacity-75 px-3 py-1 rounded-pill small">
-                    Remote Participant
+                  <div className="position-absolute bottom-0 start-0 m-3 bg-opacity-70 bg-black px-3 py-1 rounded-pill small border border-secondary border-opacity-25">
+                    {item.name}
                   </div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Controls Bar */}
-          <div className="bg-dark p-3 rounded-4 d-flex justify-content-center flex-wrap gap-3 border border-secondary shadow">
-            <button onClick={toggleAudio} className={`btn rounded-pill px-4 ${audioMuted ? 'btn-danger' : 'btn-secondary'}`}>
-              <i className={audioMuted ? 'bi bi-mic-mute-fill' : 'bi bi-mic-fill'}></i> {audioMuted ? 'Unmute' : 'Mute'}
-            </button>
-            <button onClick={toggleVideo} className={`btn rounded-pill px-4 ${videoMuted ? 'btn-danger' : 'btn-secondary'}`}>
-              <i className={videoMuted ? 'bi bi-camera-video-off-fill' : 'bi bi-camera-video-fill'}></i> {videoMuted ? 'Start Video' : 'Stop Video'}
-            </button>
-            {role === 'teacher' && (
-              <button onClick={toggleScreenShare} className={`btn rounded-pill px-4 ${isScreenSharing ? 'btn-success' : 'btn-primary'}`}>
-                <i className="bi bi-display"></i> {isScreenSharing ? 'Stop Sharing' : 'Screen Share'}
-              </button>
-            )}
-            <button onClick={() => navigate('/')} className="btn rounded-pill px-4 btn-outline-danger ms-auto">
-              Leave Room
-            </button>
-          </div>
         </div>
 
-        {/* Sidebar: Chat & Participants */}
+        {/* Sidebar */}
         <div className="col-12 col-lg-4 d-flex flex-column gap-3">
           {/* Participants */}
-          <div className="bg-dark rounded-4 p-4 flex-shrink-0 border border-secondary shadow">
-            <h5 className="border-bottom border-secondary pb-3 mb-3 fw-bold">People ({participants.length})</h5>
-            <ul className="list-unstyled m-0 text-light" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+          <div className="glass-panel">
+            <h6 className="border-bottom border-secondary border-opacity-25 pb-3 mb-3 fw-bold">People ({participants.length})</h6>
+            <ul className="list-unstyled m-0" style={{ maxHeight: '150px', overflowY: 'auto' }}>
               {participants.map((p, i) => (
-                <li key={i} className="py-2 d-flex align-items-center">
-                  <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '30px', height: '30px' }}>
-                    <i className="bi bi-person-fill text-light"></i>
+                <li key={i} className="py-2 d-flex align-items-center gap-2">
+                  <div className="bg-secondary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                    <i className="bi bi-person text-light"></i>
                   </div>
-                  {p}
+                  <span className="small">{p}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Chat Panel */}
-          <div className="bg-dark rounded-4 p-3 flex-grow-1 d-flex flex-column border border-secondary shadow overflow-hidden" style={{ minHeight: '400px' }}>
-            <h5 className="border-bottom border-secondary pb-3 mb-3 px-2 fw-bold">Room Chat</h5>
+          <div className="glass-panel flex-grow-1 d-flex flex-column overflow-hidden" style={{ minHeight: '420px' }}>
+            <h6 className="border-bottom border-secondary border-opacity-25 pb-3 mb-3 fw-bold">Room Chat</h6>
             
-            <div className="flex-grow-1 overflow-auto rounded p-2 mb-3 px-2">
+            <div className="chat-container flex-grow-1 p-2 mb-3">
               {messages.length === 0 ? (
-                <div className="text-muted text-center mt-5 small">Send a message to start the chat.</div>
+                <div className="text-secondary opacity-50 text-center mt-5 small">Send a message to start the P2P chat.</div>
               ) : (
                 messages.map((msg, i) => (
-                  <div key={i} className={`mb-3 d-flex flex-column ${msg.from === 'Me' ? 'align-items-end' : 'align-items-start'}`}>
-                    <small className="text-secondary mb-1" style={{ fontSize: '0.75rem' }}>{msg.from}</small>
-                    <div className={`py-2 px-3 rounded-4 ${msg.from === 'Me' ? 'bg-primary text-light' : 'bg-secondary text-light'}`} style={{ maxWidth: '85%', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                      {msg.text}
-                    </div>
+                  <div key={i} className={`chat-bubble ${msg.from === 'Me' ? 'me' : 'peer'}`}>
+                    <small className="d-block opacity-75 mb-1" style={{ fontSize: '0.70rem' }}>{msg.from}</small>
+                    <div>{msg.text}</div>
                   </div>
                 ))
               )}
             </div>
 
-            <form onSubmit={sendMessage} className="d-flex gap-2 mt-auto p-2 bg-black bg-opacity-25 rounded-pill">
+            <form onSubmit={sendMessage} className="d-flex gap-2 chat-input-bar p-2 mt-auto">
               <input 
                 type="text" 
                 className="form-control bg-transparent text-light border-0 shadow-none px-3" 
@@ -395,10 +399,29 @@ export default function Classroom() {
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
               />
-              <button type="submit" className="btn btn-primary rounded-pill px-4">Send</button>
+              <button type="submit" className="btn btn-primary rounded-3 px-3">Send</button>
             </form>
           </div>
         </div>
+      </div>
+
+      {/* Floating Controls Bar */}
+      <div className="controls-bar">
+        <button onClick={toggleAudio} className={`control-btn ${audioMuted ? 'active' : ''}`} title="Mute/Unmute">
+          <i className={`bi ${audioMuted ? 'bi-mic-mute-fill' : 'bi-mic-fill'}`}></i>
+        </button>
+        <button onClick={toggleVideo} className={`control-btn ${videoMuted ? 'active' : ''}`} title="Camera On/Off">
+          <i className={`bi ${videoMuted ? 'bi-camera-video-off-fill' : 'bi-camera-video-fill'}`}></i>
+        </button>
+        {role === 'teacher' && (
+          <button onClick={toggleScreenShare} className={`control-btn`} title="Screen Share">
+            <i className="bi bi-display"></i>
+          </button>
+        )}
+        <div className="vr ms-2" style={{ opacity: 0.1, height: '24px' }}></div>
+        <button onClick={() => navigate('/')} className="control-btn control-btn-danger">
+          Leave Room
+        </button>
       </div>
     </div>
   );
