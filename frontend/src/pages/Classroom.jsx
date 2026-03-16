@@ -102,12 +102,12 @@ export default function Classroom() {
       }
 
       pc.onicecandidate = (event) => {
-        if (event.candidate && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
             type: 'ice-candidate',
             from: localPeerId.current, 
             to: peerId,
-            candidate: event.candidate
+            candidate: event.candidate // can send null to signal completion
           }));
         }
       };
@@ -194,11 +194,18 @@ export default function Classroom() {
     const handleIceCandidate = async (data) => {
       const pc = peerConnectionsRef.current[data.from];
       if (pc) {
-        if (pc.remoteDescription) {
-           await pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(e => console.error('Error adding ice candidate', e));
+        if (data.candidate) {
+           if (pc.remoteDescription) {
+              await pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(e => console.error('Error adding ice candidate', e));
+           } else {
+              if (!pc.iceCandidatesQueue) pc.iceCandidatesQueue = [];
+              pc.iceCandidatesQueue.push(data.candidate);
+           }
         } else {
-           if (!pc.iceCandidatesQueue) pc.iceCandidatesQueue = [];
-           pc.iceCandidatesQueue.push(data.candidate);
+           // End-of-candidates signal
+           if (pc.remoteDescription) {
+              await pc.addIceCandidate(null).catch(e => console.error('Error adding null candidate', e));
+           }
         }
       }
     };
