@@ -9,9 +9,11 @@ export default function CreateClassroom() {
   const handleCreate = async (e) => {
     e.preventDefault();
     setLoading(true);
+    let backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+    if (backendUrl.endsWith('/')) backendUrl = backendUrl.slice(0, -1);
+
     try {
       // Mocking teacher ID for MVP
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
       const res = await fetch(`${backendUrl}/create-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

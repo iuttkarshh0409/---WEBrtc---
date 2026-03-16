@@ -10,10 +10,12 @@ export default function JoinClassroom() {
   const handleJoin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    let backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+    if (backendUrl.endsWith('/')) backendUrl = backendUrl.slice(0, -1);
+
     try {
       // Mock student ID for demo
       const user_id = Math.floor(Math.random() * 1000);
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
       const res = await fetch(`${backendUrl}/join-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
