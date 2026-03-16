@@ -22,6 +22,7 @@ export default function Classroom() {
 
   const localVideoRef = useRef(null);
   const wsRef = useRef(null);
+  const localPeerId = useRef(`peer_${Math.random().toString(36).substr(2, 9)}`);
   
   const handleCopy = () => {
     if (roomId) {
@@ -89,7 +90,7 @@ export default function Classroom() {
         if (event.candidate && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
             type: 'ice-candidate',
-            from: 'me', 
+            from: localPeerId.current, 
             to: peerId,
             candidate: event.candidate
           }));
@@ -116,6 +117,10 @@ export default function Classroom() {
         setupDataChannel(event.channel, peerId);
       };
 
+      pc.onconnectionstatechange = () => {
+         console.log(`Connection with ${peerId}: ${pc.connectionState}`);
+      };
+
       return pc;
     };
 
@@ -126,7 +131,7 @@ export default function Classroom() {
       
       wsRef.current.send(JSON.stringify({
         type: 'offer',
-        from: 'me',
+        from: localPeerId.current,
         to: peerId,
         offer: offer
       }));
@@ -142,24 +147,23 @@ export default function Classroom() {
 
       wsRef.current.send(JSON.stringify({
         type: 'answer',
-        from: 'me',
+        from: localPeerId.current,
         to: peerId,
         answer: answer
       }));
     };
 
     const handleAnswer = async (data) => {
-      const pc = Object.values(peerConnectionsRef.current).find(p => p.signalingState === 'have-local-offer');
+      const pc = peerConnectionsRef.current[data.from];
       if (pc) {
         await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
       }
     };
 
     const handleIceCandidate = async (data) => {
-      for (const pc of Object.values(peerConnectionsRef.current)) {
-        if (pc.remoteDescription) {
-          await pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(e => console.error('Error adding ice candidate', e));
-        }
+      const pc = peerConnectionsRef.current[data.from];
+      if (pc && pc.remoteDescription) {
+         await pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(e => console.error('Error adding ice candidate', e));
       }
     };
 
@@ -173,23 +177,29 @@ export default function Classroom() {
 
       wsRef.current.onopen = () => {
         console.log('Connected to signaling server');
+        // Announce oneself to trigger offers
+        wsRef.current.send(JSON.stringify({
+            type: 'peer-joined',
+            from: localPeerId.current
+        }));
       };
 
       wsRef.current.onmessage = async (event) => {
         const data = JSON.parse(event.data);
         console.log("WS message:", data.type);
 
+        if (data.from === localPeerId.current) return; // ignore self-broadcast
+
         if (data.type === 'peer-joined') {
-          const randomPeerId = `peer_${Date.now()}`;
-          await createOffer(randomPeerId, currentStream);
+          await createOffer(data.from, currentStream);
         } 
-        else if (data.type === 'offer') {
+        else if (data.type === 'offer' && data.to === localPeerId.current) {
           await handleOffer(data, currentStream);
         } 
-        else if (data.type === 'answer') {
+        else if (data.type === 'answer' && data.to === localPeerId.current) {
           await handleAnswer(data);
         } 
-        else if (data.type === 'ice-candidate') {
+        else if (data.type === 'ice-candidate' && data.to === localPeerId.current) {
           await handleIceCandidate(data);
         }
         else if (data.type === 'peer-disconnected') {
