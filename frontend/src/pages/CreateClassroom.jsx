@@ -28,7 +28,7 @@ export default function CreateClassroom() {
       navigate(`/room/${data.room_id}?role=teacher&name=${encodeURIComponent(teacherName)}`);
     } catch (error) {
       console.error('Failed to create room', error);
-      alert('Failed to connect to backend.');
+      alert(`Failed to connect to backend at: ${backendUrl}`);
     } finally {
       setLoading(false);
     }

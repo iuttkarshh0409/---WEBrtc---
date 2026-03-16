@@ -27,7 +27,7 @@ export default function JoinClassroom() {
       navigate(`/room/${roomId}?role=student&name=${encodeURIComponent(studentName)}`);
     } catch (error) {
       console.error('Failed to join room', error);
-      alert('Failed to join room. Check if the Room ID is correct.');
+      alert(`${error.message || 'Failed to connect'}\nBackend Endpoint: ${backendUrl}`);
     } finally {
       setLoading(false);
     }
