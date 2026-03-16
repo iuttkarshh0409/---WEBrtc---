@@ -133,7 +133,19 @@ export default function Classroom() {
       };
 
       pc.onconnectionstatechange = () => {
-         console.log(`Connection with ${peerId}: ${pc.connectionState}`);
+         console.log(`[RTCPeer] ${peerId} Connection: ${pc.connectionState}`);
+      };
+
+      pc.oniceconnectionstatechange = () => {
+         console.log(`[RTCPeer] ${peerId} ICE: ${pc.iceConnectionState}`);
+      };
+
+      pc.onsignalingstatechange = () => {
+         console.log(`[RTCPeer] ${peerId} Signaling: ${pc.signalingState}`);
+      };
+
+      pc.onicecandidateerror = (event) => {
+         console.error(`[RTCPeer] ICE Candidate Error with ${peerId}:`, event.url, event.errorCode, event.errorText);
       };
 
       return pc;
