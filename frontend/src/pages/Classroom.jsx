@@ -138,7 +138,10 @@ export default function Classroom() {
     };
 
     const connectWebSocket = (currentStream) => {
-      const wsBaseUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+      let wsBaseUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+      if (wsBaseUrl.endsWith('/')) {
+        wsBaseUrl = wsBaseUrl.slice(0, -1);
+      }
       const wsUrl = `${wsBaseUrl}/ws/${roomId}`;
       wsRef.current = new WebSocket(wsUrl);
 
