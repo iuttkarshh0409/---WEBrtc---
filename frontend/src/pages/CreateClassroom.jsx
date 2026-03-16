@@ -11,7 +11,8 @@ export default function CreateClassroom() {
     setLoading(true);
     try {
       // Mocking teacher ID for MVP
-      const res = await fetch('http://localhost:8000/create-room', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+      const res = await fetch(`${backendUrl}/create-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ teacher_id: Math.floor(Math.random() * 1000) })

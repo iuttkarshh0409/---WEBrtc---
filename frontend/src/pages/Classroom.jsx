@@ -129,7 +129,8 @@ export default function Classroom() {
     };
 
     const connectWebSocket = (currentStream) => {
-      const wsUrl = `ws://localhost:8000/ws/${roomId}`;
+      const wsBaseUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
+      const wsUrl = `${wsBaseUrl}/ws/${roomId}`;
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {

@@ -13,7 +13,8 @@ export default function JoinClassroom() {
     try {
       // Mock student ID for demo
       const user_id = Math.floor(Math.random() * 1000);
-      const res = await fetch('http://localhost:8000/join-room', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+      const res = await fetch(`${backendUrl}/join-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ room_id: roomId, user_id })
