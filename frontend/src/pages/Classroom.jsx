@@ -151,19 +151,40 @@ export default function Classroom() {
         to: peerId,
         answer: answer
       }));
+
+      // Flush queued candidates received early
+      if (pc.iceCandidatesQueue) {
+         for (const cand of pc.iceCandidatesQueue) {
+            await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(e => console.error('Queued ICE failed:', e));
+         }
+         pc.iceCandidatesQueue = [];
+      }
     };
 
     const handleAnswer = async (data) => {
       const pc = peerConnectionsRef.current[data.from];
       if (pc) {
         await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+        
+        // Flush queued candidates received early
+        if (pc.iceCandidatesQueue) {
+           for (const cand of pc.iceCandidatesQueue) {
+              await pc.addIceCandidate(new RTCIceCandidate(cand)).catch(e => console.error('Queued ICE failed:', e));
+           }
+           pc.iceCandidatesQueue = [];
+        }
       }
     };
 
     const handleIceCandidate = async (data) => {
       const pc = peerConnectionsRef.current[data.from];
-      if (pc && pc.remoteDescription) {
-         await pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(e => console.error('Error adding ice candidate', e));
+      if (pc) {
+        if (pc.remoteDescription) {
+           await pc.addIceCandidate(new RTCIceCandidate(data.candidate)).catch(e => console.error('Error adding ice candidate', e));
+        } else {
+           if (!pc.iceCandidatesQueue) pc.iceCandidatesQueue = [];
+           pc.iceCandidatesQueue.push(data.candidate);
+        }
       }
     };
 
