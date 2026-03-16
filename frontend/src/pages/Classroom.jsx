@@ -17,9 +17,18 @@ export default function Classroom() {
   const [audioMuted, setAudioMuted] = useState(false);
   const [videoMuted, setVideoMuted] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const localVideoRef = useRef(null);
   const wsRef = useRef(null);
+  
+  const handleCopy = () => {
+    if (roomId) {
+      navigator.clipboard.writeText(roomId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
   const peerConnectionsRef = useRef({});
   const dataChannelsRef = useRef({});
 
@@ -263,7 +272,20 @@ export default function Classroom() {
   return (
     <div className="container-fluid min-vh-100 d-flex flex-column py-3" style={{ background: '#121212', color: '#ffffff' }}>
       <header className="d-flex justify-content-between align-items-center mb-4 px-3">
-        <h3 className="m-0 fw-bold text-light">Classroom <span className="text-secondary fs-5 fw-normal">#{roomId}</span></h3>
+        <h3 className="m-0 fw-bold text-light d-flex align-items-center">
+          <span>Classroom</span>
+          <span className="text-secondary fs-6 fw-normal ms-2 bg-black bg-opacity-50 px-2 py-1 rounded border border-secondary shadow-sm">
+            #{roomId}
+          </span>
+          <button 
+            className={`btn btn-sm ms-1 border-0 ${copied ? 'text-success' : 'text-secondary'}`}
+            style={{ background: 'transparent', transition: 'color 0.2s' }}
+            onClick={handleCopy}
+            title={copied ? 'Copied!' : 'Copy Room ID'}
+          >
+            <i className={`bi ${copied ? 'bi-check-circle-fill' : 'bi-clipboard'}`}></i>
+          </button>
+        </h3>
         <div>
           <span className="badge bg-primary fs-6 py-2 px-3 fw-normal shadow-sm">Role: {role}</span>
         </div>

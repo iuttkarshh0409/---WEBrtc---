@@ -18,7 +18,13 @@ export default function CreateClassroom() {
         body: JSON.stringify({ teacher_id: Math.floor(Math.random() * 1000) })
       });
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Failed to create classroom');
+      }
       // Navigate to room as teacher
+      if (!data.room_id) {
+         throw new Error('Server did not return a valid Room ID');
+      }
       navigate(`/room/${data.room_id}?role=teacher&name=${encodeURIComponent(teacherName)}`);
     } catch (error) {
       console.error('Failed to create room', error);
