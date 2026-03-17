@@ -22,8 +22,6 @@ class Room(Base):
     
     participants = relationship("Participant", back_populates="room")
 
-User.rooms_created = relationship("Room", back_populates="teacher")
-
 class Participant(Base):
     __tablename__ = "participants"
     id = Column(Integer, primary_key=True, index=True)
