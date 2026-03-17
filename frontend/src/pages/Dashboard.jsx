@@ -39,16 +39,21 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-vh-100 bg-light text-dark px-4 px-md-5 py-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-vh-100 text-dark px-4 px-md-5 py-4" style={{ backgroundColor: '#CFFFDC', fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
          <div>
             <h4 className="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
               <i className="bi bi-layout-text-window-reverse text-success"></i> Classroom Hub
             </h4>
-            <p className="text-secondary small mb-0">Welcome back! You have {rooms.filter(r => r.is_active).length} active live sessions.</p>
+            <p className="text-secondary small mb-0">
+               {rooms.filter(r => r.is_active).length === 0 ? "You have no active classes." : `Welcome back! You have ${rooms.filter(r => r.is_active).length} active live session${rooms.filter(r => r.is_active).length > 1 ? 's' : ''}.`}
+            </p>
          </div>
          <div className="d-flex gap-2">
+            <Link to="/join" className="btn btn-outline-secondary rounded-pill px-3 py-2 fs-6 fw-bold d-flex align-items-center gap-2">
+               <i className="bi bi-door-open-fill"></i> Manual Join
+            </Link>
             <Link to="/create" className="btn btn-success rounded-pill px-3 py-2 fs-6 fw-bold d-flex align-items-center gap-2" style={{ backgroundColor: '#10B981', border: 'none', boxShadow: '0 4px 6px rgba(16, 185, 129, 0.1)' }}>
                <i className="bi bi-plus-lg"></i> Create Session
             </Link>
@@ -59,31 +64,28 @@ export default function Dashboard() {
       <div className="d-flex gap-2 mb-4">
          <button className="btn btn-sm btn-success rounded-pill px-3 fw-bold" style={{ backgroundColor: '#10B981', border: 'none' }}>All Classes</button>
          <button className="btn btn-sm btn-outline-secondary rounded-pill px-3">Live Now</button>
-         <button className="btn btn-sm btn-outline-secondary rounded-pill px-3">Scheduled</button>
       </div>
 
       {/* Main Grid Feed */}
       {loading ? (
          <div className="text-center text-secondary py-5">Loading live classrooms...</div>
-      ) : rooms.filter(r => r.title && r.teacher_name).length === 0 ? (
-         <div className="text-center text-secondary py-5 bg-white rounded-4 border border-light">No active classrooms on air. Create one to start!</div>
+      ) : rooms.filter(r => r.title && r.teacher_name && r.is_active).length === 0 ? (
+         <div className="text-center text-secondary py-5 bg-white rounded-4 border border-light shadow-sm">You have no active classes.</div>
       ) : (
          <div className="row g-4">
-            {rooms.filter(r => r.title && r.teacher_name).map((r, i) => (
+            {rooms.filter(r => r.title && r.teacher_name && r.is_active).map((r, i) => (
               <div key={i} className="col-12 col-md-6 col-lg-4">
                  <div className="card border-0 rounded-4 bg-white p-4 h-100 shadow-sm" style={{ transition: 'all 0.2s' }}>
                     <div className="d-flex justify-content-between align-items-start mb-3">
                        <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2 d-flex align-items-center gap-1" style={{ fontSize: '0.7rem' }}>
                           <span className="bg-success rounded-circle blink" style={{ width: '6px', height: '6px' }}></span> LIVE
                        </span>
-                       <span className="text-secondary small d-flex align-items-center gap-1"><i className="bi bi-people-fill"></i> {Math.floor(Math.random() * 20 + 5)} Students</span>
                     </div>
 
                     <h5 className="fw-bold mb-2 text-dark text-truncate" title={r.title}>{r.title}</h5>
                     <p className="text-secondary small mb-3">Prof. {r.teacher_name}</p>
 
-                    <div className="mt-auto pt-3 border-top border-light d-flex justify-content-between align-items-center">
-                       <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2" style={{ fontSize: '0.65rem' }}>SCIENCE</span>
+                    <div className="mt-auto pt-3 border-top border-light d-flex justify-content-end align-items-center">
                        <button 
                          onClick={() => { setSelectedRoom(r); setShowModal(true); setJoinName(''); setJoinRole('student'); }} 
                          className="btn btn-sm btn-success rounded-pill px-3 fw-bold d-flex align-items-center gap-1"

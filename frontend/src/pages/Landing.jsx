@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function Landing() {
   return (
-    <div className="min-vh-100 bg-white text-dark d-flex flex-column" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-vh-100 text-dark d-flex flex-column" style={{ backgroundColor: '#CFFFDC', fontFamily: "'Inter', sans-serif" }}>
       {/* Navbar */}
       <header className="d-flex justify-content-between align-items-center px-4 px-md-5 py-3 border-bottom border-light">
         <div className="d-flex align-items-center gap-2">
@@ -29,11 +29,11 @@ export default function Landing() {
 
         <div className="d-flex gap-3 mb-5">
           <Link to="/dashboard" className="btn btn-lg btn-success rounded-pill px-4 py-2 fs-6 fw-bold shadow-sm" style={{ backgroundColor: '#10B981', border: 'none' }}>
-            Get Started
+            Browse Classes
           </Link>
-          <button className="btn btn-lg btn-outline-secondary rounded-pill px-4 py-2 fs-6 fw-bold">
-            Watch Demo
-          </button>
+          <Link to="/join" className="btn btn-lg btn-outline-secondary rounded-pill px-4 py-2 fs-6 fw-bold">
+            Join with Code
+          </Link>
         </div>
 
         {/* Features Sub-Boxes Grid */}

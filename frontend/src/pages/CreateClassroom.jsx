@@ -37,37 +37,56 @@ export default function CreateClassroom() {
   };
 
   return (
-    <div className="container d-flex flex-column align-items-center justify-content-center min-vh-100">
-      <div className="card bg-dark text-light border-secondary p-4" style={{ width: '100%', maxWidth: '400px' }}>
-        <h2 className="mb-4 text-center">Create Classroom</h2>
+    <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 px-3" style={{ backgroundColor: '#CFFFDC', fontFamily: "'Inter', sans-serif" }}>
+      <div className="bg-white p-4 rounded-4 border-0 shadow-lg" style={{ width: '100%', maxWidth: '400px' }}>
+        <h3 className="mb-4 text-center fw-bold text-dark d-flex align-items-center justify-content-center gap-2">
+          <i className="bi bi-plus-circle-fill text-success"></i> Create Classroom
+        </h3>
+        
         <form onSubmit={handleCreate}>
           <div className="mb-3">
-            <label className="form-label">Classroom Title</label>
+            <label className="form-label small text-secondary fw-bold">Classroom Title</label>
             <input 
               type="text" 
-              className="form-control bg-secondary text-light border-0" 
+              className="form-control bg-light border-0 p-2 text-dark" 
+              style={{ borderRadius: '10px' }}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Physics 101"
-              required
+              required 
             />
           </div>
+          
           <div className="mb-3">
-            <label className="form-label">Teacher Name</label>
+            <label className="form-label small text-secondary fw-bold">Teacher Name</label>
             <input 
               type="text" 
-              className="form-control bg-secondary text-light border-0" 
+              className="form-control bg-light border-0 p-2 text-dark" 
+              style={{ borderRadius: '10px' }}
               value={teacherName}
               onChange={(e) => setTeacherName(e.target.value)}
               placeholder="e.g., Prof. ABC"
-              required
+              required 
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100 mt-3" disabled={loading}>
-            {loading ? 'Creating...' : 'Create & Join Room'}
+
+          <button type="submit" className="btn btn-success w-100 rounded-pill mt-3 fw-bold py-2 shadow-sm" style={{ backgroundColor: '#10B981', border: 'none' }} disabled={loading}>
+            {loading ? (
+               <div className="d-flex align-items-center justify-content-center gap-2">
+                  <span className="spinner-border spinner-border-sm"></span> Creating...
+               </div>
+            ) : 'Create & Join Room'}
           </button>
         </form>
+
+        <div className="text-center mt-3">
+           <a href="/dashboard" className="text-secondary small text-decoration-none hover-success" style={{ transition: 'all 0.2s' }}><i className="bi bi-arrow-left"></i> Back to Dashboard</a>
+        </div>
       </div>
+
+      <style>{`
+         .hover-success:hover { color: #10B981 !important; }
+      `}</style>
     </div>
   );
 }
