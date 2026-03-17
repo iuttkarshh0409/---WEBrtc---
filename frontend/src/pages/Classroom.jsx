@@ -129,6 +129,15 @@ export default function Classroom() {
         }
     } catch (err) {
         console.error("Attendance failed:", err);
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify({
+                type: "violation",
+                name: name,
+                peerId: localPeerId.current,
+                reason: `Attendance Join Error: ${err.message}`,
+                timestamp: new Date().toISOString()
+            }));
+        }
     }
   };
 
