@@ -19,6 +19,7 @@ export default function Classroom() {
   const [videoMuted, setVideoMuted] = useState(false);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [requests, setRequests] = useState([]); // Knock requests container
 
   const localVideoRef = useRef(null);
   const wsRef = useRef(null);
@@ -236,8 +237,6 @@ export default function Classroom() {
         }
       }
     };
-
-    const [requests, setRequests] = useState([]); // Knock requests container
 
     const handleApprove = (req) => {
       if (wsRef.current) {
