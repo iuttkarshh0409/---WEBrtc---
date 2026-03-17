@@ -5,7 +5,7 @@ from typing import Optional
 class AttendanceJoin(BaseModel):
     user_id: Optional[str] = None
     name: str # student name
-    room_id: int
+    room_id: str
 
 class AttendanceHeartbeat(BaseModel):
     session_id: int
@@ -16,7 +16,7 @@ class AttendanceLeave(BaseModel):
 class AttendanceResponse(BaseModel):
     id: int
     name: Optional[str] = None
-    classroom_id: int
+    classroom_id: str
     join_time: datetime
     last_seen: datetime
     total_active_time: int

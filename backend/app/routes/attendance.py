@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models.attendance import AttendanceSession, SessionStatus
-from app.schemas.attendance import AttendanceJoin, AttendanceHeartbeat, AttendanceLeave, AttendanceResponse
+from ..database import get_db
+from ..models.attendance import AttendanceSession, SessionStatus
+from ..schemas.attendance import AttendanceJoin, AttendanceHeartbeat, AttendanceLeave, AttendanceResponse
 from datetime import datetime
 from typing import List
 
@@ -75,7 +75,7 @@ def leave_classroom(payload: AttendanceLeave, db: Session = Depends(get_db)):
     return {"message": "Left successfully", "total_active_time": session.total_active_time}
 
 @router.get("/{classroom_id}", response_model=List[AttendanceResponse])
-def get_attendance(classroom_id: int, db: Session = Depends(get_db)):
+def get_attendance(classroom_id: str, db: Session = Depends(get_db)):
     """Teacher dashboard lists for active minutes stats."""
     # Automatically sweep inactivity before serving list triggers! (Optional)
     now = datetime.utcnow()
