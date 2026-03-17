@@ -85,7 +85,7 @@ export default function Classroom() {
                 return prev;
              });
           } else if (data.type === 'chat') {
-             setMessages(prev => [...prev, { from: 'Peer', text: data.text }]);
+             setMessages(prev => [...prev, { from: data.sender || 'Peer', text: data.text }]);
           }
         } catch (e) {
           setMessages(prev => [...prev, { from: 'Peer', text: event.data }]);
@@ -297,11 +297,11 @@ export default function Classroom() {
     // Send to all connected data channels
     Object.values(dataChannelsRef.current).forEach(channel => {
       if (channel.readyState === 'open') {
-        channel.send(JSON.stringify({ type: 'chat', text: chatInput }));
+        channel.send(JSON.stringify({ type: 'chat', text: chatInput, sender: name }));
       }
     });
 
-    setMessages(prev => [...prev, { from: 'Me', text: chatInput }]);
+    setMessages(prev => [...prev, { from: name, text: chatInput }]);
     setChatInput('');
   };
 
@@ -450,7 +450,7 @@ export default function Classroom() {
                 <div className="text-secondary opacity-50 text-center mt-5 small">Send a message to start the P2P chat.</div>
               ) : (
                 messages.map((msg, i) => (
-                  <div key={i} className={`chat-bubble ${msg.from === 'Me' ? 'me' : 'peer'}`}>
+                  <div key={i} className={`chat-bubble ${msg.from === name ? 'me' : 'peer'}`}>
                     <small className="d-block opacity-75 mb-1" style={{ fontSize: '0.70rem' }}>{msg.from}</small>
                     <div>{msg.text}</div>
                   </div>
