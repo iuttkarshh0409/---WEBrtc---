@@ -20,6 +20,8 @@ export default function Classroom() {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [requests, setRequests] = useState([]); // Knock requests container
+  const [admissionStatus, setAdmissionStatus] = useState('pending'); // 'pending', 'approved', 'rejected'
+
 
   const localVideoRef = useRef(null);
   const wsRef = useRef(null);
@@ -30,13 +32,22 @@ export default function Classroom() {
       wsRef.current.send(JSON.stringify({
         type: 'allow-join',
         from: localPeerId.current,
-        to: req.from
+        to: req.from,
+        approved: true
       }));
     }
     setRequests(prev => prev.filter(r => r.from !== req.from));
   };
 
   const handleReject = (req) => {
+    if (wsRef.current) {
+      wsRef.current.send(JSON.stringify({
+        type: 'allow-join',
+        from: localPeerId.current,
+        to: req.from,
+        approved: false
+      }));
+    }
     setRequests(prev => prev.filter(r => r.from !== req.from));
   };
   
@@ -263,14 +274,15 @@ export default function Classroom() {
 
       wsRef.current.onopen = () => {
         console.log('Connected to signaling server');
-        if (role === 'teacher') {
-            // Teachers can join straight away
+        const isAlreadyApproved = sessionStorage.getItem(`approved_${roomId}`) === 'true';
+
+        if (role === 'teacher' || isAlreadyApproved) {
+            setAdmissionStatus('approved');
             wsRef.current.send(JSON.stringify({
                 type: 'peer-joined',
                 from: localPeerId.current
             }));
         } else {
-            // Students must request admission knocking
             wsRef.current.send(JSON.stringify({
                 type: 'request-join',
                 from: localPeerId.current,
@@ -291,11 +303,17 @@ export default function Classroom() {
           }
         } 
         else if (data.type === 'allow-join' && data.to === localPeerId.current) {
-          console.log("Admission Approved! Joining P2P stream...");
-          wsRef.current.send(JSON.stringify({
-             type: 'peer-joined',
-             from: localPeerId.current
-          }));
+          if (data.approved) {
+              console.log("Admission Approved! Joining P2P stream...");
+              setAdmissionStatus('approved');
+              sessionStorage.setItem(`approved_${roomId}`, 'true'); // cache approval
+              wsRef.current.send(JSON.stringify({
+                 type: 'peer-joined',
+                 from: localPeerId.current
+              }));
+          } else {
+              setAdmissionStatus('rejected');
+          }
         }
         else if (data.type === 'peer-joined') {
           await createOffer(data.from, currentStream);
@@ -432,6 +450,26 @@ export default function Classroom() {
                   </div>
                </div>
             ))}
+         </div>
+      )}
+
+      {/* Student Admission Loading Overlay / Rejection Banner */}
+      {role === 'student' && admissionStatus === 'pending' && (
+         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center" style={{ zIndex: 1999, backgroundColor: '#0A0C10' }}>
+            <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}></div>
+            <h4 className="fw-bold">Waiting for instructor approval...</h4>
+            <p className="text-secondary small">Please stay on this page. You will join automatically once admitted.</p>
+         </div>
+      )}
+
+      {role === 'student' && admissionStatus === 'rejected' && (
+         <div className="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center" style={{ zIndex: 1999, backgroundColor: '#0A0C10' }}>
+            <div className="bg-danger bg-opacity-10 p-4 rounded-4 border border-danger border-opacity-25 text-center" style={{ maxWidth: '400px' }}>
+               <i className="bi bi-x-circle-fill text-danger fs-3 mb-2"></i>
+               <h5 className="text-danger fw-bold">Admission Denied</h5>
+               <p className="text-secondary small">The instructor of this classroom has rejected your request to join.</p>
+               <button className="btn btn-sm btn-outline-secondary mt-2 rounded-pill px-3" onClick={() => navigate('/')}>Dashboard</button>
+            </div>
          </div>
       )}
 
