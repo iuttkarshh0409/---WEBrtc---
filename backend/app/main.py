@@ -38,7 +38,8 @@ def home():
 
 # WebSocket Endpoint for Signaling
 @app.websocket("/ws/{room_id}")
-async def websocket_signaling(websocket: WebSocket, room_id: str, peer_id: str = None):
+async def websocket_signaling(websocket: WebSocket, room_id: str):
+    peer_id = websocket.query_params.get("peer_id")
     await manager.connect(websocket, room_id, peer_id)
     try:
         while True:
