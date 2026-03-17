@@ -38,6 +38,8 @@ export default function Dashboard() {
     setShowModal(false);
   };
 
+  const activeRooms = rooms.filter(r => r.title && r.teacher_name && r.is_active);
+
   return (
     <div className="min-vh-100 text-dark px-4 px-md-5 py-4" style={{ backgroundColor: '#CFFFDC', fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
@@ -47,7 +49,7 @@ export default function Dashboard() {
               <i className="bi bi-layout-text-window-reverse text-success"></i> Classroom Hub
             </h4>
             <p className="text-secondary small mb-0">
-               {rooms.filter(r => r.is_active).length === 0 ? "You have no active classes." : `Welcome back! You have ${rooms.filter(r => r.is_active).length} active live session${rooms.filter(r => r.is_active).length > 1 ? 's' : ''}.`}
+               {activeRooms.length === 0 ? "You have no active classes." : `Welcome back! You have ${activeRooms.length} active live session${activeRooms.length > 1 ? 's' : ''}.`}
             </p>
          </div>
          <div className="d-flex gap-2">
@@ -69,11 +71,11 @@ export default function Dashboard() {
       {/* Main Grid Feed */}
       {loading ? (
          <div className="text-center text-secondary py-5">Loading live classrooms...</div>
-      ) : rooms.filter(r => r.title && r.teacher_name && r.is_active).length === 0 ? (
+      ) : activeRooms.length === 0 ? (
          <div className="text-center text-secondary py-5 bg-white rounded-4 border border-light shadow-sm">You have no active classes.</div>
       ) : (
          <div className="row g-4">
-            {rooms.filter(r => r.title && r.teacher_name && r.is_active).map((r, i) => (
+            {activeRooms.map((r, i) => (
               <div key={i} className="col-12 col-md-6 col-lg-4">
                  <div className="card border-0 rounded-4 bg-white p-4 h-100 shadow-sm" style={{ transition: 'all 0.2s' }}>
                     <div className="d-flex justify-content-between align-items-start mb-3">
