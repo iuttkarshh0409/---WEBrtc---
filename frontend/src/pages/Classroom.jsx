@@ -795,27 +795,27 @@ export default function Classroom() {
         </div>
 
         {/* Sidebar */}
-        <div className="col-12 col-lg-4 d-flex flex-column gap-3">
+        <div className="col-12 col-lg-4 d-flex flex-column gap-3" style={{ maxHeight: 'calc(100vh - 120px)' }}>
           {/* Participants */}
-          <div className="glass-panel">
-            <h6 className="border-bottom border-secondary border-opacity-25 pb-3 mb-3 fw-bold">People ({participants.length})</h6>
-            <ul className="list-unstyled m-0" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+          <div className="glass-panel" style={{ borderRadius: '16px' }}>
+            <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-3 fw-bold d-flex align-items-center">
+              <i className="bi bi-people-fill me-2 text-primary"></i> People ({participants.length})
+            </h6>
+            <div className="d-flex flex-wrap gap-2" style={{ maxHeight: '120px', overflowY: 'auto' }}>
               {participants.map((p, i) => (
-                <li key={i} className="py-2 d-flex align-items-center gap-2">
-                  <div className="bg-secondary bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
-                    <i className="bi bi-person text-light"></i>
-                  </div>
-                  <span className="small">{p}</span>
-                </li>
+                <div key={i} className="d-flex align-items-center gap-2 bg-white bg-opacity-5 px-3 py-1 rounded-pill" style={{ transition: 'all 0.2s' }}>
+                  <div className="bg-primary rounded-circle" style={{ width: '8px', height: '8px' }}></div>
+                  <span className="small text-white-50">{p}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
 
           {/* Teacher Monitoring Panel */}
           {role === 'teacher' && (
-            <div className="glass-panel d-flex flex-column" style={{ maxHeight: '220px', overflow: 'hidden' }}>
-               <h6 className="border-bottom border-secondary border-opacity-25 pb-3 mb-3 fw-bold text-danger d-flex align-items-center">
-                 <i className="bi bi-eye-fill me-2"></i> Student Monitoring Panel
+            <div className="glass-panel d-flex flex-column" style={{ maxHeight: '240px', overflow: 'hidden', borderRadius: '16px' }}>
+               <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-2 fw-bold text-danger d-flex align-items-center">
+                 <i className="bi bi-exclamation-octagon-fill me-2"></i> Student Monitoring Panel
                </h6>
                {Object.keys(violatingPeers).length === 0 ? (
                   <div className="text-secondary opacity-50 small text-center my-3">No violations recorded yet.</div>
@@ -851,47 +851,32 @@ export default function Classroom() {
 
           {/* Teacher Attendance Panel */}
           {role === 'teacher' && (
-            <div className="glass-panel d-flex flex-column mt-1" style={{ maxHeight: '250px', overflow: 'hidden' }}>
-               <h6 className="border-bottom border-secondary border-opacity-25 pb-3 mb-3 fw-bold text-success d-flex align-items-center">
+            <div className="glass-panel d-flex flex-column" style={{ maxHeight: '250px', overflow: 'hidden', borderRadius: '16px' }}>
+               <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-2 fw-bold text-success d-flex align-items-center">
                  <i className="bi bi-person-check-fill me-2"></i> Attendance Tracking
                </h6>
                {attendanceList.length === 0 ? (
                   <div className="text-secondary opacity-50 small text-center my-3">No students logged yet.</div>
                ) : (
-                  <div className="table-responsive flex-grow-1" style={{ overflowY: 'auto' }}>
-                    <table className="table table-dark table-sm table-borderless m-0 small">
-                       <thead>
-                         <tr className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                           <th className="px-2">Name</th>
-                           <th className="text-center">Active Mins</th>
-                           <th>Status</th>
-                           <th>Attendance</th>
-                         </tr>
-                       </thead>
-                       <tbody>
-                          {attendanceList.map((a, i) => {
-                             const activeMins = Math.floor(a.total_active_time / 60);
-                             const isActive = a.status === 'active';
-                             const isLeft = a.status === 'left';
-                             const isPresent = a.total_active_time >= 60;
-                             
-                             return (
-                               <tr key={i} className="text-white-50" style={{ transition: 'all 0.2s' }}>
-                                  <td className="px-2">{a.name}</td>
-                                  <td className="text-center">
-                                     <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2">{activeMins}m</span>
-                                  </td>
-                                  <td>
-                                     <span className={`badge ${isActive ? 'bg-success' : isLeft ? 'bg-danger' : 'bg-warning text-dark'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{a.status}</span>
-                                  </td>
-                                  <td>
-                                     <span className={`badge ${isPresent ? 'bg-success' : 'bg-danger'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{isPresent ? 'Present' : 'Absent'}</span>
-                                  </td>
-                               </tr>
-                             );
-                          })}
-                       </tbody>
-                    </table>
+                  <div className="d-flex flex-column gap-2" style={{ overflowY: 'auto' }}>
+                     {attendanceList.map((a, i) => {
+                        const activeMins = Math.floor(a.total_active_time / 60);
+                        const isPresent = a.total_active_time >= 60;
+                        const isActive = a.status === 'active';
+                        
+                        return (
+                          <div key={i} className="d-flex justify-content-between align-items-center p-2 rounded-3 bg-white bg-opacity-5" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
+                             <div>
+                                <div className="fw-bold small text-white">{a.name}</div>
+                                <div className="text-secondary" style={{ fontSize: '0.65rem' }}>{a.status.toUpperCase()}</div>
+                             </div>
+                             <div className="d-flex gap-2 align-items-center">
+                                <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2">{activeMins}m</span>
+                                <span className={`badge ${isPresent ? 'bg-success' : 'bg-danger'} rounded-pill px-2`} style={{ fontSize: '0.65rem' }}>{isPresent ? 'Present' : 'Absent'}</span>
+                             </div>
+                          </div>
+                        );
+                     })}
                   </div>
                )}
             </div>
