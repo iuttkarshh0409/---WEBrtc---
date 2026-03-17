@@ -4,19 +4,18 @@ from ..database import get_db
 from ..models import Room, Participant, User
 from ..schemas import RoomCreate, Room as RoomSchema, JoinRoomReq, Participant as ParticipantSchema
 
+from typing import List
+
 router = APIRouter()
+
+@router.get("/rooms", response_model=List[RoomSchema])
+def list_active_rooms(db: Session = Depends(get_db)):
+    # Fetch all active classrooms
+    return db.query(Room).filter(Room.is_active == True).all()
 
 @router.post("/create-room", response_model=RoomSchema)
 def create_room(room: RoomCreate, db: Session = Depends(get_db)):
-    # Verify the teacher exists (Optional, if we have users seeded)
-    db_user = db.query(User).filter(User.id == room.teacher_id).first()
-    if not db_user:
-        # Create a mock teacher for hackathon demo
-        db_user = User(id=room.teacher_id, name=f"Teacher {room.teacher_id}", role="teacher")
-        db.add(db_user)
-        db.commit()
-
-    db_room = Room(teacher_id=room.teacher_id)
+    db_room = Room(title=room.title, teacher_name=room.teacher_name, is_active=True)
     db.add(db_room)
     db.commit()
     db.refresh(db_room)

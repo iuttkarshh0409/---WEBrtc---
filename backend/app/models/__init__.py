@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 import datetime
 import uuid
@@ -15,11 +15,12 @@ class User(Base):
 class Room(Base):
     __tablename__ = "rooms"
     room_id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
-    teacher_id = Column(Integer, ForeignKey("users.id"))
+    title = Column(String, index=True, nullable=True) # Added for dashboard listing
+    teacher_name = Column(String, nullable=True) # Added for quick list display
+    is_active = Column(Boolean, default=True) # Added to filter active streams
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     
     participants = relationship("Participant", back_populates="room")
-    teacher = relationship("User", back_populates="rooms_created")
 
 User.rooms_created = relationship("Room", back_populates="teacher")
 

@@ -15,11 +15,14 @@ class User(UserBase):
         from_attributes = True
 
 class RoomCreate(BaseModel):
-    teacher_id: int
+    title: str
+    teacher_name: str
 
 class Room(BaseModel):
     room_id: str
-    teacher_id: int
+    title: Optional[str] = None
+    teacher_name: Optional[str] = None
+    is_active: bool
     created_at: datetime
     class Config:
         from_attributes = True

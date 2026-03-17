@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function CreateClassroom() {
   const [teacherName, setTeacherName] = useState('');
+  const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -13,11 +14,10 @@ export default function CreateClassroom() {
     if (backendUrl.endsWith('/')) backendUrl = backendUrl.slice(0, -1);
 
     try {
-      // Mocking teacher ID for MVP
       const res = await fetch(`${backendUrl}/create-room`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teacher_id: Math.floor(Math.random() * 1000) })
+        body: JSON.stringify({ title, teacher_name: teacherName })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -42,13 +42,25 @@ export default function CreateClassroom() {
         <h2 className="mb-4 text-center">Create Classroom</h2>
         <form onSubmit={handleCreate}>
           <div className="mb-3">
+            <label className="form-label">Classroom Title</label>
+            <input 
+              type="text" 
+              className="form-control bg-secondary text-light border-0" 
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Physics 101"
+              required
+            />
+          </div>
+          <div className="mb-3">
             <label className="form-label">Teacher Name</label>
             <input 
               type="text" 
               className="form-control bg-secondary text-light border-0" 
               value={teacherName}
               onChange={(e) => setTeacherName(e.target.value)}
-              required 
+              placeholder="e.g., Prof. ABC"
+              required
             />
           </div>
           <button type="submit" className="btn btn-primary w-100 mt-3" disabled={loading}>
