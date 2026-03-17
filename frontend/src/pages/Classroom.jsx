@@ -860,22 +860,22 @@ export default function Classroom() {
                ) : (
                   <div className="d-flex flex-column gap-2" style={{ overflowY: 'auto' }}>
                      {attendanceList.map((a, i) => {
-                        const activeMins = Math.floor(a.total_active_time / 60);
-                        const isPresent = a.total_active_time >= 60;
-                        const isActive = a.status === 'active';
+                        const activeMins = a.total_active_time ? Math.floor(a.total_active_time / 60) : 0;
+                        const isPresent = a.total_active_time ? a.total_active_time >= 60 : false;
+                        const statusText = a.status ? a.status.toUpperCase() : 'N/A';
                         
                         return (
-                          <div key={i} className="d-flex justify-content-between align-items-center p-2 rounded-3 bg-white bg-opacity-5" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
-                             <div>
-                                <div className="fw-bold small text-white">{a.name}</div>
-                                <div className="text-secondary" style={{ fontSize: '0.65rem' }}>{a.status.toUpperCase()}</div>
-                             </div>
-                             <div className="d-flex gap-2 align-items-center">
-                                <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2">{activeMins}m</span>
-                                <span className={`badge ${isPresent ? 'bg-success' : 'bg-danger'} rounded-pill px-2`} style={{ fontSize: '0.65rem' }}>{isPresent ? 'Present' : 'Absent'}</span>
-                             </div>
-                          </div>
-                        );
+                           <div key={i} className="d-flex justify-content-between align-items-center p-2 rounded-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.04)', transition: 'all 0.2s' }}>
+                              <div>
+                                 <div className="fw-bold small text-white">{a.name || 'Anonymous'}</div>
+                                 <div className="text-secondary" style={{ fontSize: '0.65rem' }}>{statusText}</div>
+                              </div>
+                              <div className="d-flex gap-2 align-items-center">
+                                 <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2">{activeMins}m</span>
+                                 <span className={`badge ${isPresent ? 'bg-success' : 'bg-danger'} rounded-pill px-2`} style={{ fontSize: '0.65rem' }}>{isPresent ? 'Present' : 'Absent'}</span>
+                              </div>
+                           </div>
+                         );
                      })}
                   </div>
                )}
