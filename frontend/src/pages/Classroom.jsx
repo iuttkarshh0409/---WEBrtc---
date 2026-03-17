@@ -102,8 +102,23 @@ export default function Classroom() {
         }
       };
 
+      const handleBlur = () => {
+         handleViolation("Window focus lost");
+      };
+
+      const handleFocus = () => {
+         console.log("User returned to window");
+      };
+
       document.addEventListener('visibilitychange', handleVisibilityChange);
-      return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('blur', handleBlur);
+      window.addEventListener('focus', handleFocus);
+
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('blur', handleBlur);
+        window.removeEventListener('focus', handleFocus);
+      };
     }
   }, [role, admissionStatus]);
   
