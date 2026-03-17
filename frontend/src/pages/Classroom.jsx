@@ -813,7 +813,7 @@ export default function Classroom() {
 
           {/* Teacher Monitoring Panel */}
           {role === 'teacher' && (
-            <div className="glass-panel d-flex flex-column" style={{ maxHeight: '240px', overflow: 'hidden', borderRadius: '16px' }}>
+            <div className="glass-panel d-flex flex-column shadow-sm mb-3" style={{ height: '220px', overflow: 'hidden', borderRadius: '16px', padding: '1rem' }}>
                <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-2 fw-bold text-danger d-flex align-items-center">
                  <i className="bi bi-exclamation-octagon-fill me-2"></i> Student Monitoring Panel
                </h6>
@@ -852,7 +852,7 @@ export default function Classroom() {
 
           {/* Teacher Attendance Panel */}
           {role === 'teacher' && (
-            <div className="glass-panel d-flex flex-column" style={{ maxHeight: '250px', overflow: 'hidden', borderRadius: '16px' }}>
+            <div className="glass-panel d-flex flex-column shadow-sm mb-3" style={{ height: '230px', overflow: 'hidden', borderRadius: '16px', padding: '1rem' }}>
                <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-2 fw-bold text-success d-flex align-items-center">
                  <i className="bi bi-person-check-fill me-2"></i> Attendance Tracking
                </h6>
