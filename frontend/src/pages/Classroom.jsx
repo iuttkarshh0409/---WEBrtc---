@@ -85,6 +85,16 @@ export default function Classroom() {
   };
 
   useEffect(() => {
+    const handleUnload = () => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+         wsRef.current.send(JSON.stringify({
+            type: 'peer-disconnected',
+            from: localPeerId.current
+         }));
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+
     let stream;
     
     // Abstracting functions out to prevent closure stale state, using Refs heavily
@@ -315,6 +325,20 @@ export default function Classroom() {
               setAdmissionStatus('rejected');
           }
         }
+        else if (data.type === 'peer-disconnected') {
+          console.log(`[RTCPeer] ${data.from} disconnected instantly`);
+          setRemoteStreams(prev => {
+             const item = prev.find(s => s.peerId === data.from);
+             if (item) {
+                 setParticipants(p => p.filter(name => name !== item.name));
+             }
+             return prev.filter(s => s.peerId !== data.from);
+          });
+          if (peerConnectionsRef.current[data.from]) {
+             peerConnectionsRef.current[data.from].close();
+             delete peerConnectionsRef.current[data.from];
+          }
+        }
         else if (data.type === 'peer-joined') {
           await createOffer(data.from, currentStream);
         } 
@@ -353,6 +377,7 @@ export default function Classroom() {
       if (wsRef.current) wsRef.current.close();
       Object.values(peerConnectionsRef.current).forEach(pc => pc.close());
       peerConnectionsRef.current = {};
+      window.removeEventListener('beforeunload', handleUnload);
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
