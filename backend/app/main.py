@@ -44,6 +44,15 @@ async def websocket_signaling(websocket: WebSocket, room_id: str):
     try:
         while True:
             data = await websocket.receive_text()
+            
+            # Print violation logs if present
+            try:
+                msg = json.loads(data)
+                if msg.get("type") == "violation":
+                    print(f"Violation from {msg.get('name')}: {msg.get('reason')}")
+            except Exception:
+                pass # Safe malformed JSON buffering
+
             await manager.broadcast(room_id, data, exclude=websocket)
 
     except WebSocketDisconnect:
