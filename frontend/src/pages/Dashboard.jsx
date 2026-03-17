@@ -39,82 +39,99 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="landing-container">
-      <div className="landing-card">
-        <h1 className="landing-title">Remote Learning Platform</h1>
-        <p className="landing-subtitle">A real-time video collaboration & screen sharing workspace using WebRTC</p>
-        
-        <div className="btn-group-custom">
-          <Link to="/create" className="btn-premium btn-premium-primary">
-            <i className="bi bi-mortarboard-fill fs-5"></i>
-            <span>Create Classroom</span>
-          </Link>
-          <Link to="/join" className="btn-premium btn-premium-outline">
-            <i className="bi bi-people-fill fs-5"></i>
-            <span>Join Classroom</span>
-          </Link>
-        </div>
-
-        {/* Active Classrooms Feed */}
-        <div className="mt-5 w-100">
-          <h5 className="text-secondary mb-3 d-flex align-items-center justify-content-center gap-2">
-            <span className="bg-success rounded-circle" style={{ width: '8px', height: '8px' }}></span>
-            Active Classes ({rooms.filter(r => r.title && r.teacher_name).length})
-          </h5>
-
-          {loading ? (
-             <div className="text-muted small">Loading live classrooms...</div>
-          ) : rooms.filter(r => r.title && r.teacher_name).length === 0 ? (
-             <div className="text-secondary opacity-50 small">No active classrooms on air. Create one to start!</div>
-          ) : (
-             <div className="row g-3 mt-1 justify-content-center" style={{ maxHeight: '240px', overflowY: 'auto' }}>
-                {rooms.filter(r => r.title && r.teacher_name).map((r, i) => (
-                  <div key={i} className="col-12 col-md-10">
-                     <div className="p-3 rounded-4 d-flex justify-content-between align-items-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.04)' }}>
-                        <div className="text-start">
-                           <h6 className="m-0 fw-bold">{r.title}</h6>
-                           <small className="text-secondary">Taught by {r.teacher_name}</small>
-                        </div>
-                        <button 
-                          onClick={() => { setSelectedRoom(r); setShowModal(true); setJoinName(''); setJoinRole('student'); }} 
-                          className="btn btn-sm btn-primary rounded-pill px-3"
-                        >
-                          Join
-                        </button>
-                     </div>
-                  </div>
-                ))}
-             </div>
-          )}
-        </div>
+    <div className="min-vh-100 bg-light text-dark px-4 px-md-5 py-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+         <div>
+            <h4 className="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+              <i className="bi bi-layout-text-window-reverse text-success"></i> Classroom Hub
+            </h4>
+            <p className="text-secondary small mb-0">Welcome back! You have {rooms.filter(r => r.is_active).length} active live sessions.</p>
+         </div>
+         <div className="d-flex gap-2">
+            <Link to="/create" className="btn btn-success rounded-pill px-3 py-2 fs-6 fw-bold d-flex align-items-center gap-2" style={{ backgroundColor: '#10B981', border: 'none', boxShadow: '0 4px 6px rgba(16, 185, 129, 0.1)' }}>
+               <i className="bi bi-plus-lg"></i> Create Session
+            </Link>
+         </div>
       </div>
+
+      {/* Pill Filters */}
+      <div className="d-flex gap-2 mb-4">
+         <button className="btn btn-sm btn-success rounded-pill px-3 fw-bold" style={{ backgroundColor: '#10B981', border: 'none' }}>All Classes</button>
+         <button className="btn btn-sm btn-outline-secondary rounded-pill px-3">Live Now</button>
+         <button className="btn btn-sm btn-outline-secondary rounded-pill px-3">Scheduled</button>
+      </div>
+
+      {/* Main Grid Feed */}
+      {loading ? (
+         <div className="text-center text-secondary py-5">Loading live classrooms...</div>
+      ) : rooms.filter(r => r.title && r.teacher_name).length === 0 ? (
+         <div className="text-center text-secondary py-5 bg-white rounded-4 border border-light">No active classrooms on air. Create one to start!</div>
+      ) : (
+         <div className="row g-4">
+            {rooms.filter(r => r.title && r.teacher_name).map((r, i) => (
+              <div key={i} className="col-12 col-md-6 col-lg-4">
+                 <div className="card border-0 rounded-4 bg-white p-4 h-100 shadow-sm" style={{ transition: 'all 0.2s' }}>
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                       <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2 d-flex align-items-center gap-1" style={{ fontSize: '0.7rem' }}>
+                          <span className="bg-success rounded-circle blink" style={{ width: '6px', height: '6px' }}></span> LIVE
+                       </span>
+                       <span className="text-secondary small d-flex align-items-center gap-1"><i className="bi bi-people-fill"></i> {Math.floor(Math.random() * 20 + 5)} Students</span>
+                    </div>
+
+                    <h5 className="fw-bold mb-2 text-dark text-truncate" title={r.title}>{r.title}</h5>
+                    <p className="text-secondary small mb-3">Prof. {r.teacher_name}</p>
+
+                    <div className="mt-auto pt-3 border-top border-light d-flex justify-content-between align-items-center">
+                       <span className="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2" style={{ fontSize: '0.65rem' }}>SCIENCE</span>
+                       <button 
+                         onClick={() => { setSelectedRoom(r); setShowModal(true); setJoinName(''); setJoinRole('student'); }} 
+                         className="btn btn-sm btn-success rounded-pill px-3 fw-bold d-flex align-items-center gap-1"
+                         style={{ backgroundColor: '#10B981', border: 'none' }}
+                       >
+                         Join Stream <i className="bi bi-arrow-right-short fs-5"></i>
+                       </button>
+                    </div>
+                 </div>
+              </div>
+            ))}
+         </div>
+      )}
 
       {/* Join Overlay Modal */}
       {showModal && (
-        <div className="modal-backdrop d-flex align-items-center justify-content-center" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.75)', zIndex: 1100 }}>
-           <div className="bg-dark p-4 rounded-4 border border-secondary" style={{ width: '90%', maxWidth: '400px', backgroundColor: '#11131A' }}>
-              <h5 className="mb-3 text-start fw-bold">Join: {selectedRoom?.title}</h5>
+        <div className="modal-backdrop d-flex align-items-center justify-content-center" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', zIndex: 1100, backdropFilter: 'blur(4px)' }}>
+           <div className="bg-white p-4 rounded-4 border-0 shadow-lg" style={{ width: '90%', maxWidth: '400px' }}>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                 <h5 className="m-0 fw-bold text-dark">Join: {selectedRoom?.title}</h5>
+                 <button className="btn-close" onClick={() => setShowModal(false)}></button>
+              </div>
               
               <div className="mb-3 text-start">
-                 <label className="form-label small text-secondary">Your Name</label>
-                 <input type="text" className="form-control bg-secondary bg-opacity-25 text-white border-0 p-2" value={joinName} onChange={e => setJoinName(e.target.value)} placeholder="Enter name" required />
+                 <label className="form-label small text-secondary fw-bold">Your Name</label>
+                 <input type="text" className="form-control bg-light border-0 p-2 text-dark" style={{ borderRadius: '10px' }} value={joinName} onChange={e => setJoinName(e.target.value)} placeholder="Enter name" required />
               </div>
-
-              <div className="mb-3 text-start">
-                 <label className="form-label small text-secondary">Role</label>
-                 <select className="form-select bg-secondary bg-opacity-25 text-white border-0 p-2" value={joinRole} style={{ cursor: 'pointer' }} onChange={e => setJoinRole(e.target.value)}>
-                    <option value="student" style={{ background: '#1A1D26' }}>Student</option>
-                    <option value="teacher" style={{ background: '#1A1D26' }}>Teacher</option>
+              <div className="mb-4 text-start">
+                 <label className="form-label small text-secondary fw-bold">Choose Role</label>
+                 <select className="form-select bg-light border-0 p-2 text-dark" style={{ borderRadius: '10px' }} value={joinRole} onChange={e => setJoinRole(e.target.value)}>
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher (Host)</option>
                  </select>
               </div>
 
-              <div className="d-flex gap-2 justify-content-end mt-4">
-                 <button className="btn btn-sm btn-outline-secondary px-3 rounded-pill" onClick={() => setShowModal(false)}>Cancel</button>
-                 <button className="btn btn-sm btn-primary px-3 rounded-pill" onClick={handleJoinClass}>Join Class</button>
+              <div className="d-flex gap-2 mt-4">
+                 <button onClick={() => setShowModal(false)} className="btn btn-outline-secondary rounded-pill flex-grow-1">Cancel</button>
+                 <button onClick={handleJoinClass} className="btn btn-success rounded-pill flex-grow-1 fw-bold" style={{ backgroundColor: '#10B981', border: 'none' }}>Join</button>
               </div>
            </div>
         </div>
       )}
+      
+      <style>{`
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important; cursor: pointer; }
+      `}</style>
     </div>
   );
 }
