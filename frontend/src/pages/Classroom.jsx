@@ -865,6 +865,7 @@ export default function Classroom() {
                            <th className="px-2">Name</th>
                            <th className="text-center">Active Mins</th>
                            <th>Status</th>
+                           <th>Attendance</th>
                          </tr>
                        </thead>
                        <tbody>
@@ -872,6 +873,8 @@ export default function Classroom() {
                              const activeMins = Math.floor(a.total_active_time / 60);
                              const isActive = a.status === 'active';
                              const isLeft = a.status === 'left';
+                             const isPresent = a.total_active_time >= 60;
+                             
                              return (
                                <tr key={i} className="text-white-50" style={{ transition: 'all 0.2s' }}>
                                   <td className="px-2">{a.name}</td>
@@ -880,6 +883,9 @@ export default function Classroom() {
                                   </td>
                                   <td>
                                      <span className={`badge ${isActive ? 'bg-success' : isLeft ? 'bg-danger' : 'bg-warning text-dark'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{a.status}</span>
+                                  </td>
+                                  <td>
+                                     <span className={`badge ${isPresent ? 'bg-success' : 'bg-danger'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{isPresent ? 'Present' : 'Absent'}</span>
                                   </td>
                                </tr>
                              );
