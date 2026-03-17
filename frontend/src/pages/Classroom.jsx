@@ -21,6 +21,7 @@ export default function Classroom() {
   const [copied, setCopied] = useState(false);
   const [requests, setRequests] = useState([]); // Knock requests container
   const [admissionStatus, setAdmissionStatus] = useState('pending'); // 'pending', 'approved', 'rejected'
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
 
   const localVideoRef = useRef(null);
@@ -50,6 +51,31 @@ export default function Classroom() {
     }
     setRequests(prev => prev.filter(r => r.from !== req.from));
   };
+
+  const enterFullscreen = () => {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen()
+        .then(() => setIsFullscreen(true))
+        .catch(err => console.error("Fullscreen Error:", err));
+    }
+  };
+
+  useEffect(() => {
+    if (role === 'student' && admissionStatus === 'approved') {
+      enterFullscreen();
+
+      const handleFullscreenChange = () => {
+        const isCurrentlyFull = document.fullscreenElement !== null;
+        setIsFullscreen(isCurrentlyFull);
+        if (!isCurrentlyFull) {
+           alert("⚠️ Please stay in Fullscreen during the session to avoid warnings!");
+        }
+      };
+
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }
+  }, [role, admissionStatus]);
   
   const handleCopy = () => {
     if (roomId) {
@@ -513,7 +539,14 @@ export default function Classroom() {
             <i className={`bi ${copied ? 'bi-check-circle-fill' : 'bi-clipboard'}`}></i>
           </button>
         </h3>
-        <span className="badge bg-primary fs-6 py-2 px-3 fw-normal shadow-sm">Role: {role}</span>
+        <div className="d-flex align-items-center">
+            <span className="badge bg-primary fs-6 py-2 px-3 fw-normal shadow-sm">Role: {role}</span>
+            {role === 'student' && (
+              <span className={`badge ${isFullscreen ? 'bg-success' : 'bg-warning text-dark'} fs-6 py-2 px-3 fw-normal shadow-sm ms-2`} style={{ transition: 'all 0.2s' }}>
+                <i className={`bi bi-fullscreen me-1 ${isFullscreen ? '' : 'text-danger'}`}></i> Fullscreen: {isFullscreen ? 'ON' : 'OFF'}
+              </span>
+            )}
+        </div>
       </header>
 
       <div className="row flex-grow-1 gy-3">
