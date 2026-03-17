@@ -24,6 +24,21 @@ export default function Classroom() {
   const localVideoRef = useRef(null);
   const wsRef = useRef(null);
   const localPeerId = useRef(`peer_${Math.random().toString(36).substr(2, 9)}`);
+
+  const handleApprove = (req) => {
+    if (wsRef.current) {
+      wsRef.current.send(JSON.stringify({
+        type: 'allow-join',
+        from: localPeerId.current,
+        to: req.from
+      }));
+    }
+    setRequests(prev => prev.filter(r => r.from !== req.from));
+  };
+
+  const handleReject = (req) => {
+    setRequests(prev => prev.filter(r => r.from !== req.from));
+  };
   
   const handleCopy = () => {
     if (roomId) {
@@ -236,21 +251,6 @@ export default function Classroom() {
            }
         }
       }
-    };
-
-    const handleApprove = (req) => {
-      if (wsRef.current) {
-        wsRef.current.send(JSON.stringify({
-          type: 'allow-join',
-          from: localPeerId.current,
-          to: req.from
-        }));
-      }
-      setRequests(prev => prev.filter(r => r.from !== req.from));
-    };
-
-    const handleReject = (req) => {
-      setRequests(prev => prev.filter(r => r.from !== req.from));
     };
 
     const connectWebSocket = (currentStream) => {
