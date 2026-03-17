@@ -216,7 +216,7 @@ export default function Classroom() {
                      const studentName = item ? item.name : `Participant ${peerId.slice(-4)}`;
                      setViolatingPeers(prev => ({
                          ...prev,
-                         [peerId]: { count: data.count, name: studentName }
+                         [peerId]: { count: data.count, name: studentName, lastReason: data.reason }
                      }));
                      return streams;
                  });
@@ -436,6 +436,19 @@ export default function Classroom() {
              peerConnectionsRef.current[data.from].close();
              delete peerConnectionsRef.current[data.from];
           }
+        }
+        else if (data.type === 'violation') {
+           console.log("WebSocket violation received:", data);
+           if (role === 'teacher') {
+               setViolatingPeers(prev => ({
+                   ...prev,
+                   [data.peerId]: {
+                       name: data.name,
+                       count: (prev[data.peerId]?.count || 0) + 1,
+                       lastReason: data.reason
+                   }
+               }));
+           }
         }
         else if (data.type === 'peer-joined') {
           await createOffer(data.from, currentStream);
@@ -711,6 +724,44 @@ export default function Classroom() {
               ))}
             </ul>
           </div>
+
+          {/* Teacher Monitoring Panel */}
+          {role === 'teacher' && (
+            <div className="glass-panel d-flex flex-column" style={{ maxHeight: '220px', overflow: 'hidden' }}>
+               <h6 className="border-bottom border-secondary border-opacity-25 pb-3 mb-3 fw-bold text-danger d-flex align-items-center">
+                 <i className="bi bi-eye-fill me-2"></i> Student Monitoring Panel
+               </h6>
+               {Object.keys(violatingPeers).length === 0 ? (
+                  <div className="text-secondary opacity-50 small text-center my-3">No violations recorded yet.</div>
+               ) : (
+                  <div className="table-responsive flex-grow-1" style={{ overflowY: 'auto' }}>
+                    <table className="table table-dark table-sm table-borderless m-0 small">
+                       <thead>
+                         <tr className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                           <th className="px-2">Name</th>
+                           <th className="text-center">Count</th>
+                           <th>Last Reason</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                          {Object.values(violatingPeers).map((v, i) => {
+                             const isHigh = v.count > 2;
+                             return (
+                               <tr key={i} className={isHigh ? 'text-danger fw-bold' : 'text-white-50'} style={{ transition: 'color 0.2s' }}>
+                                  <td className="px-2">{v.name}</td>
+                                  <td className="text-center">
+                                     <span className={`badge ${isHigh ? 'bg-danger' : 'bg-secondary'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{v.count}</span>
+                                  </td>
+                                  <td className="text-truncate text-secondary" style={{ maxWidth: '80px', fontSize: '0.70rem' }} title={v.lastReason}>{v.lastReason || 'N/A'}</td>
+                               </tr>
+                             );
+                          })}
+                       </tbody>
+                    </table>
+                  </div>
+               )}
+            </div>
+          )}
 
           {/* Chat Panel */}
           <div className="glass-panel flex-grow-1 d-flex flex-column overflow-hidden" style={{ minHeight: '420px' }}>
