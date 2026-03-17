@@ -11,13 +11,6 @@ class ConnectionManager:
         if room_id not in self.active_connections:
             self.active_connections[room_id] = {}
         self.active_connections[room_id][peer_id] = websocket
-        
-        # Notify others with identification parameters
-        await self.broadcast(room_id, json.dumps({
-            "type": "peer-joined",
-            "from": peer_id,
-            "message": "A new peer connected to the room."
-        }), exclude=websocket)
 
     def disconnect(self, websocket: WebSocket, room_id: str):
         if room_id in self.active_connections:
