@@ -22,6 +22,7 @@ export default function Classroom() {
   const [requests, setRequests] = useState([]); // Knock requests container
   const [admissionStatus, setAdmissionStatus] = useState('pending'); // 'pending', 'approved', 'rejected'
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [violations, setViolations] = useState(0);
 
 
   const localVideoRef = useRef(null);
@@ -74,6 +75,25 @@ export default function Classroom() {
 
       document.addEventListener('fullscreenchange', handleFullscreenChange);
       return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }
+  }, [role, admissionStatus]);
+
+  const handleViolation = (reason) => {
+    console.warn(`Violation detected: ${reason}`);
+    setViolations(prev => prev + 1);
+    alert(`⚠️ Warning: ${reason} is not allowed during the session!`);
+  };
+
+  useEffect(() => {
+    if (role === 'student' && admissionStatus === 'approved') {
+      const handleVisibilityChange = () => {
+        if (document.hidden) {
+           handleViolation("Tab switched / Minimized");
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }
   }, [role, admissionStatus]);
   
@@ -544,6 +564,11 @@ export default function Classroom() {
             {role === 'student' && (
               <span className={`badge ${isFullscreen ? 'bg-success' : 'bg-warning text-dark'} fs-6 py-2 px-3 fw-normal shadow-sm ms-2`} style={{ transition: 'all 0.2s' }}>
                 <i className={`bi bi-fullscreen me-1 ${isFullscreen ? '' : 'text-danger'}`}></i> Fullscreen: {isFullscreen ? 'ON' : 'OFF'}
+              </span>
+            )}
+            {role === 'student' && violations > 0 && (
+              <span className="badge bg-danger fs-6 py-2 px-3 fw-normal shadow-sm ms-2" style={{ transition: 'all 0.2s' }}>
+                <i className="bi bi-exclamation-triangle-fill me-1"></i> Violations: {violations}
               </span>
             )}
         </div>
