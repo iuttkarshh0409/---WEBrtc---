@@ -817,33 +817,34 @@ export default function Classroom() {
                <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-2 fw-bold text-danger d-flex align-items-center">
                  <i className="bi bi-exclamation-octagon-fill me-2"></i> Student Monitoring Panel
                </h6>
-               {Object.keys(violatingPeers).length === 0 ? (
-                  <div className="text-white-50 small text-center my-3">No violations recorded yet.</div>
+               {remoteStreams.length === 0 ? (
+                  <div className="text-white-50 small text-center my-3">No students connected yet.</div>
                ) : (
                   <div className="table-responsive flex-grow-1" style={{ overflowY: 'auto' }}>
-                    <table className="table table-dark table-sm table-borderless m-0 small">
-                       <thead>
-                         <tr className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                           <th className="px-2">Name</th>
-                           <th className="text-center">Count</th>
-                           <th>Last Reason</th>
-                         </tr>
-                       </thead>
-                       <tbody>
-                          {Object.values(violatingPeers).map((v, i) => {
-                             const isHigh = v.count > 2;
-                             return (
-                               <tr key={i} className={isHigh ? 'text-danger fw-bold' : 'text-white-50'} style={{ transition: 'color 0.2s' }}>
-                                  <td className="px-2">{v.name}</td>
-                                  <td className="text-center">
-                                     <span className={`badge ${isHigh ? 'bg-danger' : 'bg-secondary'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{v.count}</span>
-                                  </td>
-                                  <td className="text-truncate text-secondary" style={{ maxWidth: '80px', fontSize: '0.70rem' }} title={v.lastReason}>{v.lastReason || 'N/A'}</td>
-                               </tr>
-                             );
-                          })}
-                       </tbody>
-                    </table>
+                     <table className="table table-dark table-sm table-borderless m-0 small">
+                        <thead>
+                          <tr className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                            <th className="px-2">Name</th>
+                            <th className="text-center">Count</th>
+                            <th>Last Reason</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                           {remoteStreams.map((s, i) => {
+                              const v = violatingPeers[s.peerId] || { count: 0, lastReason: 'None' };
+                              const isHigh = v.count > 2;
+                              return (
+                                <tr key={i} className={isHigh ? 'text-danger fw-bold' : 'text-white-50'} style={{ transition: 'color 0.2s' }}>
+                                   <td className="px-2">{s.name || `Participant ${s.peerId.slice(-4)}`}</td>
+                                   <td className="text-center">
+                                      <span className={`badge ${isHigh ? 'bg-danger' : 'bg-secondary'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{v.count}</span>
+                                   </td>
+                                   <td className="text-truncate text-secondary" style={{ maxWidth: '100px', fontSize: '0.70rem' }} title={v.lastReason}>{v.lastReason || 'None'}</td>
+                                </tr>
+                              );
+                           })}
+                        </tbody>
+                     </table>
                   </div>
                )}
             </div>
@@ -855,19 +856,20 @@ export default function Classroom() {
                <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-2 fw-bold text-success d-flex align-items-center">
                  <i className="bi bi-person-check-fill me-2"></i> Attendance Tracking
                </h6>
-               {attendanceList.length === 0 ? (
+               {remoteStreams.length === 0 ? (
                   <div className="text-white-50 small text-center my-3">No students logged yet.</div>
                ) : (
                   <div className="d-flex flex-column gap-2" style={{ overflowY: 'auto' }}>
-                     {attendanceList.map((a, i) => {
-                        const activeMins = a.total_active_time ? Math.floor(a.total_active_time / 60) : 0;
-                        const isPresent = a.total_active_time ? a.total_active_time >= 60 : false;
-                        const statusText = a.status ? a.status.toUpperCase() : 'N/A';
-                        
-                        return (
+                     {remoteStreams.map((s, i) => {
+                         const a = attendanceList.find(at => at.name === s.name) || { total_active_time: 0, status: 'inactive' };
+                         const activeMins = a.total_active_time ? Math.floor(a.total_active_time / 60) : 0;
+                         const isPresent = a.total_active_time >= 60;
+                         const statusText = a.status ? a.status.toUpperCase() : 'INACTIVE';
+                         
+                         return (
                            <div key={i} className="d-flex justify-content-between align-items-center p-2 rounded-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.04)', transition: 'all 0.2s' }}>
                               <div>
-                                 <div className="fw-bold small text-white">{a.name || 'Anonymous'}</div>
+                                 <div className="fw-bold small text-white">{s.name || `Participant ${s.peerId.slice(-4)}`}</div>
                                  <div className="text-secondary" style={{ fontSize: '0.65rem' }}>{statusText}</div>
                               </div>
                               <div className="d-flex gap-2 align-items-center">
@@ -876,7 +878,7 @@ export default function Classroom() {
                               </div>
                            </div>
                          );
-                     })}
+                      })}
                   </div>
                )}
             </div>
