@@ -28,6 +28,7 @@ export default function Classroom() {
   
   const [attendanceStarted, setAttendanceStarted] = useState(false);
   const attendanceSessionId = useRef(null);
+  const [attendanceList, setAttendanceList] = useState([]);
 
 
   const localVideoRef = useRef(null);
@@ -183,6 +184,28 @@ export default function Classroom() {
     }
     return () => clearInterval(interval);
   }, [attendanceStarted, role]);
+
+  useEffect(() => {
+    let interval;
+    if (role === 'teacher') {
+      const fetchAttendance = async () => {
+         try {
+             const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+             const res = await fetch(`${baseUrl}/attendance/${roomId}`);
+             if (res.ok) {
+                 const data = await res.json();
+                 setAttendanceList(data);
+             }
+         } catch (e) {
+             console.error("Attendance fetch fail:", e);
+         }
+      };
+
+      fetchAttendance(); // run once immediately
+      interval = setInterval(fetchAttendance, 30000); // 30 seconds
+    }
+    return () => clearInterval(interval);
+  }, [role, roomId]);
   
   const handleCopy = () => {
     if (roomId) {
@@ -807,6 +830,48 @@ export default function Classroom() {
                                      <span className={`badge ${isHigh ? 'bg-danger' : 'bg-secondary'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{v.count}</span>
                                   </td>
                                   <td className="text-truncate text-secondary" style={{ maxWidth: '80px', fontSize: '0.70rem' }} title={v.lastReason}>{v.lastReason || 'N/A'}</td>
+                               </tr>
+                             );
+                          })}
+                       </tbody>
+                    </table>
+                  </div>
+               )}
+            </div>
+          )}
+
+          {/* Teacher Attendance Panel */}
+          {role === 'teacher' && (
+            <div className="glass-panel d-flex flex-column mt-1" style={{ maxHeight: '250px', overflow: 'hidden' }}>
+               <h6 className="border-bottom border-secondary border-opacity-25 pb-3 mb-3 fw-bold text-success d-flex align-items-center">
+                 <i className="bi bi-person-check-fill me-2"></i> Attendance Tracking
+               </h6>
+               {attendanceList.length === 0 ? (
+                  <div className="text-secondary opacity-50 small text-center my-3">No students logged yet.</div>
+               ) : (
+                  <div className="table-responsive flex-grow-1" style={{ overflowY: 'auto' }}>
+                    <table className="table table-dark table-sm table-borderless m-0 small">
+                       <thead>
+                         <tr className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                           <th className="px-2">Name</th>
+                           <th className="text-center">Active Mins</th>
+                           <th>Status</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                          {attendanceList.map((a, i) => {
+                             const activeMins = Math.floor(a.total_active_time / 60);
+                             const isActive = a.status === 'active';
+                             const isLeft = a.status === 'left';
+                             return (
+                               <tr key={i} className="text-white-50" style={{ transition: 'all 0.2s' }}>
+                                  <td className="px-2">{a.name}</td>
+                                  <td className="text-center">
+                                     <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2">{activeMins}m</span>
+                                  </td>
+                                  <td>
+                                     <span className={`badge ${isActive ? 'bg-success' : isLeft ? 'bg-danger' : 'bg-warning text-dark'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{a.status}</span>
+                                  </td>
                                </tr>
                              );
                           })}
