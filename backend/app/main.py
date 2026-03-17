@@ -38,30 +38,18 @@ def home():
 
 # WebSocket Endpoint for Signaling
 @app.websocket("/ws/{room_id}")
-async def websocket_signaling(websocket: WebSocket, room_id: str):
-    await manager.connect(websocket, room_id)
+async def websocket_signaling(websocket: WebSocket, room_id: str, peer_id: str = None):
+    await manager.connect(websocket, room_id, peer_id)
     try:
         while True:
-            # We receive text messages from peers
-            # The structure of `data` typically looks like:
-            # {
-            #    "type": "offer" | "answer" | "ice-candidate",
-            #    "from": "user_id_A",
-            #    "to": "user_id_B",
-            #    ... (sdp or candidate data)
-            # }
             data = await websocket.receive_text()
-            
-            # The signaling server's job is minimal: Just forward messages to peers
-            # Peer-to-Peer messages can be broadcasted or sent specifically if tracked,
-            # but for a simple chatroom, broadcasting them explicitly suffices, provided
-            # peers ignore offers/answers not intended for them (by filtering `to`).
             await manager.broadcast(room_id, data, exclude=websocket)
 
     except WebSocketDisconnect:
-        manager.disconnect(websocket, room_id)
-        # Notify remaining peers that someone disconnected
+        removed_peer = manager.disconnect(websocket, room_id)
+        # Notify remaining peers that someone disconnected with peer identity!
         await manager.broadcast(room_id, json.dumps({
             "type": "peer-disconnected",
+            "from": removed_peer,
             "message": "A peer disconnected."
         }))

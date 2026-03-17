@@ -279,7 +279,7 @@ export default function Classroom() {
       if (wsBaseUrl.endsWith('/')) {
         wsBaseUrl = wsBaseUrl.slice(0, -1);
       }
-      const wsUrl = `${wsBaseUrl}/ws/${roomId}`;
+      const wsUrl = `${wsBaseUrl}/ws/${roomId}?peer_id=${localPeerId.current}`;
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
