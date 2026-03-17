@@ -6,6 +6,16 @@ from .websocket.signaling import manager
 import json
 
 # Create the DB tables (Usually done with Alembic, but Base.metadata is fine for MVP)
+from sqlalchemy import text
+with engine.connect() as conn:
+    try:
+        conn.execute(text("ALTER TABLE rooms ADD COLUMN title VARCHAR"))
+        conn.execute(text("ALTER TABLE rooms ADD COLUMN teacher_name VARCHAR"))
+        conn.execute(text("ALTER TABLE rooms ADD COLUMN is_active BOOLEAN DEFAULT 1"))
+        conn.commit()
+    except Exception as e:
+        print("Migration skipped or already applied:", e)
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="WebRTC Collaboration Platform")
