@@ -818,7 +818,7 @@ export default function Classroom() {
                  <i className="bi bi-exclamation-octagon-fill me-2"></i> Student Monitoring Panel
                </h6>
                {Object.keys(violatingPeers).length === 0 ? (
-                  <div className="text-secondary opacity-50 small text-center my-3">No violations recorded yet.</div>
+                  <div className="text-white-50 small text-center my-3">No violations recorded yet.</div>
                ) : (
                   <div className="table-responsive flex-grow-1" style={{ overflowY: 'auto' }}>
                     <table className="table table-dark table-sm table-borderless m-0 small">
@@ -856,7 +856,7 @@ export default function Classroom() {
                  <i className="bi bi-person-check-fill me-2"></i> Attendance Tracking
                </h6>
                {attendanceList.length === 0 ? (
-                  <div className="text-secondary opacity-50 small text-center my-3">No students logged yet.</div>
+                  <div className="text-white-50 small text-center my-3">No students logged yet.</div>
                ) : (
                   <div className="d-flex flex-column gap-2" style={{ overflowY: 'auto' }}>
                      {attendanceList.map((a, i) => {
