@@ -134,6 +134,25 @@ export default function Classroom() {
 
       pc.onconnectionstatechange = () => {
          console.log(`[RTCPeer] ${peerId} Connection: ${pc.connectionState}`);
+         
+         if (['failed', 'disconnected', 'closed'].includes(pc.connectionState)) {
+             setRemoteStreams(prev => {
+                 // extract displayed name to purge from participants list
+                 const item = prev.find(s => s.peerId === peerId);
+                 if (item) {
+                     setParticipants(p => p.filter(name => name !== item.name));
+                 }
+                 return prev.filter(s => s.peerId !== peerId);
+             });
+
+             if (peerConnectionsRef.current[peerId]) {
+                 peerConnectionsRef.current[peerId].close();
+                 delete peerConnectionsRef.current[peerId];
+             }
+             if (dataChannelsRef.current[peerId]) {
+                 delete dataChannelsRef.current[peerId];
+             }
+         }
       };
 
       pc.oniceconnectionstatechange = () => {
