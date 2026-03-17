@@ -91,6 +91,21 @@ export default function Classroom() {
        });
        return next;
     });
+
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        const payload = {
+            type: "violation",
+            name: name,
+            peerId: localPeerId.current,
+            reason: reason,
+            timestamp: new Date().toISOString()
+        };
+        console.log("Sending violation via WebSocket:", payload);
+        wsRef.current.send(JSON.stringify(payload));
+    } else {
+        console.log("WebSocket is not available for violation broadcast.");
+    }
+
     alert(`⚠️ Warning: ${reason} is not allowed during the session!`);
   };
 
