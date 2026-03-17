@@ -1,46 +1,78 @@
 .classroom-container {
   min-height: 100vh;
   width: 100%;
-  background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.05), transparent 600px),
-              #090B0E;
+  background: radial-gradient(circle at 100% 100%, rgba(99, 102, 241, 0.06), transparent 800px),
+              radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.04), transparent 600px),
+              #0B0E14;
   color: #E2E8F0;
   display: flex;
   flex-direction: column;
-  padding-bottom: 100px; /* space for floating bar */
+  padding-bottom: 110px; /* space for floating bar */
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(30, 41, 59, 0.25);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 20px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  padding: 1.5rem;
+}
+
+.video-card {
+  background: #12151E;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  position: relative;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.video-card:hover {
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.video-label {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  background: rgba(15, 20, 30, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 8px 16px;
+  border-radius: 14px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: 10;
 }
 
 /* Floating Controllers bar */
 .controls-bar {
   position: fixed;
-  bottom: 24px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(13, 16, 22, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(15, 20, 28, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 24px;
-  padding: 12px 24px;
+  padding: 14px 28px;
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
   z-index: 1000;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.7);
   animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .control-btn {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -50,18 +82,19 @@
   color: #fff;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  font-size: 1.1rem;
 }
 
 .control-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: rgba(255, 255, 255, 0.15);
 }
 
 .control-btn.active {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.2);
   color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.4);
 }
 
 .control-btn.active:hover {
@@ -69,16 +102,16 @@
 }
 
 .control-btn-danger {
-  background: rgba(239, 68, 68, 0.8) !important;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
   border: none;
   font-weight: 600;
-  padding: 0 1.25rem;
+  padding: 0 1.5rem;
   width: auto;
+  border-radius: 16px;
 }
 
 .control-btn-danger:hover {
-  background: #dc2626 !important;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
 }
 
 /* Chat bubles */
@@ -91,17 +124,17 @@
 }
 
 .chat-bubble {
-  padding: 10px 14px;
-  border-radius: 16px;
+  padding: 12px 16px;
+  border-radius: 18px;
   max-width: 82%;
   word-break: break-word;
   font-size: 0.9375rem;
-  line-height: 1.4;
+  line-height: 1.45;
   position: relative;
 }
 
 .chat-bubble.me {
-  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
   color: #ffffff;
   border-bottom-right-radius: 4px;
   margin-left: auto;
@@ -109,22 +142,24 @@
 }
 
 .chat-bubble.peer {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(45, 55, 72, 0.4);
   color: #F1F5F9;
   border-bottom-left-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   margin-right: auto;
 }
 
 .chat-input-bar {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 20, 28, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 18px;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
+  padding: 4px;
 }
 
 .chat-input-bar:focus-within {
   border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(15, 20, 28, 0.6);
 }
 
 @keyframes slideUp {

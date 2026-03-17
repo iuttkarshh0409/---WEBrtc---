@@ -386,13 +386,14 @@ export default function Classroom() {
       <div className="row flex-grow-1 gy-3">
         {/* Main Video Grid */}
         <div className="col-12 col-lg-8 d-flex flex-column">
-          <div className="row row-cols-1 row-cols-md-2 g-3 flex-grow-1 align-items-stretch">
+          <div className={`row g-3 flex-grow-1 align-items-stretch ${remoteStreams.length === 0 ? 'row-cols-1 justify-content-center' : 'row-cols-1 row-cols-md-2'}`}>
             {/* Local Video */}
-            <div className="col position-relative" style={{ minHeight: '300px' }}>
-              <div className="bg-dark rounded-4 overflow-hidden shadow-lg h-100 position-relative border border-secondary border-opacity-25">
+            <div className="col position-relative" style={{ minHeight: '320px', maxWidth: remoteStreams.length === 0 ? '640px' : 'none', margin: remoteStreams.length === 0 ? '0 auto' : '0' }}>
+              <div className="video-card">
                 <video ref={localVideoRef} autoPlay playsInline muted 
                   className="w-100 h-100 position-absolute top-0 start-0" style={{ objectFit: 'cover' }} />
-                <div className="position-absolute bottom-0 start-0 m-3 bg-black bg-opacity-70 px-3 py-1 rounded-pill small border border-secondary border-opacity-25">
+                <div className="video-label">
+                  <div className="bg-success rounded-circle me-1" style={{ width: '8px', height: '8px' }}></div>
                   {name} (Me)
                 </div>
               </div>
@@ -400,8 +401,8 @@ export default function Classroom() {
 
             {/* Remote Videos */}
             {remoteStreams.map((item, idx) => (
-              <div key={item.stream.id || idx} className="col position-relative" style={{ minHeight: '300px' }}>
-                <div className="bg-dark rounded-4 overflow-hidden shadow-lg h-100 position-relative border border-secondary border-opacity-25">
+              <div key={item.stream.id || idx} className="col position-relative" style={{ minHeight: '320px' }}>
+                <div className="video-card">
                   <video 
                     autoPlay 
                     playsInline 
@@ -413,7 +414,8 @@ export default function Classroom() {
                       }
                     }}
                   />
-                  <div className="position-absolute bottom-0 start-0 m-3 bg-opacity-70 bg-black px-3 py-1 rounded-pill small border border-secondary border-opacity-25">
+                  <div className="video-label">
+                    <div className="bg-primary rounded-circle me-1" style={{ width: '8px', height: '8px' }}></div>
                     {item.name}
                   </div>
                 </div>
