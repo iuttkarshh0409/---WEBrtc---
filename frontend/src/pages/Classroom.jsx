@@ -25,6 +25,9 @@ export default function Classroom() {
   const [violations, setViolations] = useState(0);
   const [violatingPeers, setViolatingPeers] = useState({}); // { peerId: { count: 3, name: "Name" } }
   const [showViolationsModal, setShowViolationsModal] = useState(false);
+  
+  const [attendanceStarted, setAttendanceStarted] = useState(false);
+  const attendanceSessionId = useRef(null);
 
 
   const localVideoRef = useRef(null);
@@ -109,6 +112,25 @@ export default function Classroom() {
     alert(`⚠️ Warning: ${reason} is not allowed during the session!`);
   };
 
+  const startAttendance = async () => {
+    try {
+        const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+        const res = await fetch(`${baseUrl}/attendance/join`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, room_id: roomId })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            attendanceSessionId.current = data.id;
+            setAttendanceStarted(true);
+            console.log("Attendance started:", data.id);
+        }
+    } catch (err) {
+        console.error("Attendance failed:", err);
+    }
+  };
+
   useEffect(() => {
     if (role === 'student' && admissionStatus === 'approved') {
       const handleVisibilityChange = () => {
@@ -136,6 +158,31 @@ export default function Classroom() {
       };
     }
   }, [role, admissionStatus]);
+
+  useEffect(() => {
+    if (role === 'student' && admissionStatus === 'approved' && !attendanceStarted) {
+      startAttendance();
+    }
+  }, [role, admissionStatus, attendanceStarted]);
+
+  useEffect(() => {
+    let interval;
+    if (role === 'student' && attendanceStarted && attendanceSessionId.current) {
+      interval = setInterval(async () => {
+         try {
+             const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+             await fetch(`${baseUrl}/attendance/heartbeat`, {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ session_id: attendanceSessionId.current })
+             });
+         } catch (e) {
+             console.error("Heartbeat fail:", e);
+         }
+      }, 45000);
+    }
+    return () => clearInterval(interval);
+  }, [attendanceStarted, role]);
   
   const handleCopy = () => {
     if (roomId) {
@@ -172,6 +219,13 @@ export default function Classroom() {
 
   useEffect(() => {
     const handleUnload = () => {
+      const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+      
+      if (attendanceSessionId.current) {
+          const blob = new Blob([JSON.stringify({ session_id: attendanceSessionId.current })], { type: 'application/json' });
+          navigator.sendBeacon(`${baseUrl}/attendance/leave`, blob);
+      }
+
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
          wsRef.current.send(JSON.stringify({
             type: 'peer-disconnected',
