@@ -30,6 +30,11 @@ export default function Classroom() {
   const attendanceSessionId = useRef(null);
   const [attendanceList, setAttendanceList] = useState([]);
 
+  let apiBaseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+  if (apiBaseUrl.endsWith('/')) {
+    apiBaseUrl = apiBaseUrl.slice(0, -1);
+  }
+
 
   const localVideoRef = useRef(null);
   const wsRef = useRef(null);
@@ -115,8 +120,7 @@ export default function Classroom() {
 
   const startAttendance = async () => {
     try {
-        const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-        const res = await fetch(`${baseUrl}/attendance/join`, {
+        const res = await fetch(`${apiBaseUrl}/attendance/join`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: name, room_id: roomId })
@@ -180,8 +184,7 @@ export default function Classroom() {
     if (role === 'student' && attendanceStarted && attendanceSessionId.current) {
       interval = setInterval(async () => {
          try {
-             const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-             await fetch(`${baseUrl}/attendance/heartbeat`, {
+             await fetch(`${apiBaseUrl}/attendance/heartbeat`, {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json' },
                  body: JSON.stringify({ session_id: attendanceSessionId.current })
@@ -199,8 +202,7 @@ export default function Classroom() {
     if (role === 'teacher') {
       const fetchAttendance = async () => {
          try {
-             const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-             const res = await fetch(`${baseUrl}/attendance/${roomId}`);
+             const res = await fetch(`${apiBaseUrl}/attendance/${roomId}`);
              if (res.ok) {
                  const data = await res.json();
                  setAttendanceList(data);
@@ -251,11 +253,9 @@ export default function Classroom() {
 
   useEffect(() => {
     const handleUnload = () => {
-      const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
-      
       if (attendanceSessionId.current) {
           const blob = new Blob([JSON.stringify({ session_id: attendanceSessionId.current })], { type: 'application/json' });
-          navigator.sendBeacon(`${baseUrl}/attendance/leave`, blob);
+          navigator.sendBeacon(`${apiBaseUrl}/attendance/leave`, blob);
       }
 
       if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
