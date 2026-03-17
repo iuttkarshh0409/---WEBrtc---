@@ -23,6 +23,8 @@ export default function Classroom() {
   const [admissionStatus, setAdmissionStatus] = useState('pending'); // 'pending', 'approved', 'rejected'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [violations, setViolations] = useState(0);
+  const [violatingPeers, setViolatingPeers] = useState({}); // { peerId: { count: 3, name: "Name" } }
+  const [showViolationsModal, setShowViolationsModal] = useState(false);
 
 
   const localVideoRef = useRef(null);
@@ -80,7 +82,15 @@ export default function Classroom() {
 
   const handleViolation = (reason) => {
     console.warn(`Violation detected: ${reason}`);
-    setViolations(prev => prev + 1);
+    setViolations(prev => {
+       const next = prev + 1;
+       Object.values(dataChannelsRef.current).forEach(channel => {
+          if (channel.readyState === 'open') {
+             channel.send(JSON.stringify({ type: 'violation-update', count: next, reason }));
+          }
+       });
+       return next;
+    });
     alert(`⚠️ Warning: ${reason} is not allowed during the session!`);
   };
 
@@ -169,6 +179,18 @@ export default function Classroom() {
              });
           } else if (data.type === 'chat') {
              setMessages(prev => [...prev, { from: data.sender || 'Peer', text: data.text }]);
+          } else if (data.type === 'violation-update') {
+             if (role === 'teacher') {
+                 setRemoteStreams(streams => {
+                     const item = streams.find(s => s.peerId === peerId);
+                     const studentName = item ? item.name : `Participant ${peerId.slice(-4)}`;
+                     setViolatingPeers(prev => ({
+                         ...prev,
+                         [peerId]: { count: data.count, name: studentName }
+                     }));
+                     return streams;
+                 });
+             }
           }
         } catch (e) {
           setMessages(prev => [...prev, { from: 'Peer', text: event.data }]);
@@ -544,6 +566,34 @@ export default function Classroom() {
          </div>
       )}
 
+      {/* Teacher Monitoring Violations Modal */}
+      {role === 'teacher' && showViolationsModal && (
+        <div className="modal-backdrop d-flex align-items-center justify-content-center" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.75)', zIndex: 2050 }}>
+           <div className="bg-dark p-4 rounded-4 border border-secondary" style={{ width: '90%', maxWidth: '420px', backgroundColor: '#11131A' }}>
+              <h5 className="mb-3 text-start fw-bold">Monitoring Violations</h5>
+              
+              <div className="list-group list-group-flush" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                 {Object.values(violatingPeers).length === 0 ? (
+                    <div className="text-secondary opacity-50 small text-center">No student violations on air yet.</div>
+                 ) : (
+                    Object.values(violatingPeers).map((v, i) => (
+                       <div key={i} className="list-group-item bg-transparent text-white border-secondary border-opacity-25 d-flex justify-content-between align-items-center px-0">
+                           <div className="text-start">
+                              <span className="fw-bold">{v.name}</span>
+                           </div>
+                           <span className="badge bg-danger rounded-pill px-2">{v.count} Warnings</span>
+                       </div>
+                    ))
+                 )}
+              </div>
+
+              <div className="d-flex justify-content-end mt-4">
+                 <button className="btn btn-sm btn-outline-secondary px-3 rounded-pill" onClick={() => setShowViolationsModal(false)}>Close</button>
+              </div>
+           </div>
+        </div>
+      )}
+
       <header className="d-flex justify-content-between align-items-center mb-4">
         <h3 className="m-0 fw-bold d-flex align-items-center">
           <span>Classroom</span>
@@ -566,10 +616,10 @@ export default function Classroom() {
                 <i className={`bi bi-fullscreen me-1 ${isFullscreen ? '' : 'text-danger'}`}></i> Fullscreen: {isFullscreen ? 'ON' : 'OFF'}
               </span>
             )}
-            {role === 'student' && violations > 0 && (
-              <span className="badge bg-danger fs-6 py-2 px-3 fw-normal shadow-sm ms-2" style={{ transition: 'all 0.2s' }}>
-                <i className="bi bi-exclamation-triangle-fill me-1"></i> Violations: {violations}
-              </span>
+            {role === 'teacher' && Object.keys(violatingPeers).length > 0 && (
+              <button className="btn btn-sm btn-danger fs-6 py-2 px-3 fw-normal shadow-sm ms-2" style={{ transition: 'all 0.2s', borderRadius: '12px' }} onClick={() => setShowViolationsModal(true)}>
+                <i className="bi bi-exclamation-octagon-fill me-1"></i> Violations Dashboard
+              </button>
             )}
         </div>
       </header>
