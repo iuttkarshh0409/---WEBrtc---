@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
 export default function Dashboard() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Join Modal States
+  const [showModal, setShowModal] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [joinName, setJoinName] = useState('');
+  const [joinRole, setJoinRole] = useState('student');
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -23,6 +31,12 @@ export default function Dashboard() {
     };
     fetchRooms();
   }, []);
+
+  const handleJoinClass = () => {
+    if (!joinName.trim()) return alert("Please enter your name!");
+    navigate(`/room/${selectedRoom.room_id}?role=${joinRole}&name=${encodeURIComponent(joinName)}`);
+    setShowModal(false);
+  };
 
   return (
     <div className="landing-container">
@@ -61,12 +75,12 @@ export default function Dashboard() {
                            <h6 className="m-0 fw-bold">{r.title}</h6>
                            <small className="text-secondary">Taught by {r.teacher_name}</small>
                         </div>
-                        <Link 
-                          to={`/room/${r.room_id}?role=student&name=Student_${Math.random().toString(36).substr(2, 4)}`} 
+                        <button 
+                          onClick={() => { setSelectedRoom(r); setShowModal(true); setJoinName(''); setJoinRole('student'); }} 
                           className="btn btn-sm btn-primary rounded-pill px-3"
                         >
                           Join
-                        </Link>
+                        </button>
                      </div>
                   </div>
                 ))}
@@ -74,6 +88,33 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Join Overlay Modal */}
+      {showModal && (
+        <div className="modal-backdrop d-flex align-items-center justify-content-center" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.75)', zIndex: 1100 }}>
+           <div className="bg-dark p-4 rounded-4 border border-secondary" style={{ width: '90%', maxWidth: '400px', backgroundColor: '#11131A' }}>
+              <h5 className="mb-3 text-start fw-bold">Join: {selectedRoom?.title}</h5>
+              
+              <div className="mb-3 text-start">
+                 <label className="form-label small text-secondary">Your Name</label>
+                 <input type="text" className="form-control bg-secondary bg-opacity-25 text-white border-0 p-2" value={joinName} onChange={e => setJoinName(e.target.value)} placeholder="Enter name" required />
+              </div>
+
+              <div className="mb-3 text-start">
+                 <label className="form-label small text-secondary">Role</label>
+                 <select className="form-select bg-secondary bg-opacity-25 text-white border-0 p-2" value={joinRole} style={{ cursor: 'pointer' }} onChange={e => setJoinRole(e.target.value)}>
+                    <option value="student" style={{ background: '#1A1D26' }}>Student</option>
+                    <option value="teacher" style={{ background: '#1A1D26' }}>Teacher</option>
+                 </select>
+              </div>
+
+              <div className="d-flex gap-2 justify-content-end mt-4">
+                 <button className="btn btn-sm btn-outline-secondary px-3 rounded-pill" onClick={() => setShowModal(false)}>Cancel</button>
+                 <button className="btn btn-sm btn-primary px-3 rounded-pill" onClick={handleJoinClass}>Join Class</button>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }

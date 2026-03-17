@@ -237,6 +237,23 @@ export default function Classroom() {
       }
     };
 
+    const [requests, setRequests] = useState([]); // Knock requests container
+
+    const handleApprove = (req) => {
+      if (wsRef.current) {
+        wsRef.current.send(JSON.stringify({
+          type: 'allow-join',
+          from: localPeerId.current,
+          to: req.from
+        }));
+      }
+      setRequests(prev => prev.filter(r => r.from !== req.from));
+    };
+
+    const handleReject = (req) => {
+      setRequests(prev => prev.filter(r => r.from !== req.from));
+    };
+
     const connectWebSocket = (currentStream) => {
       let wsBaseUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
       if (wsBaseUrl.endsWith('/')) {
@@ -247,11 +264,20 @@ export default function Classroom() {
 
       wsRef.current.onopen = () => {
         console.log('Connected to signaling server');
-        // Announce oneself to trigger offers
-        wsRef.current.send(JSON.stringify({
-            type: 'peer-joined',
-            from: localPeerId.current
-        }));
+        if (role === 'teacher') {
+            // Teachers can join straight away
+            wsRef.current.send(JSON.stringify({
+                type: 'peer-joined',
+                from: localPeerId.current
+            }));
+        } else {
+            // Students must request admission knocking
+            wsRef.current.send(JSON.stringify({
+                type: 'request-join',
+                from: localPeerId.current,
+                name: name
+            }));
+        }
       };
 
       wsRef.current.onmessage = async (event) => {
@@ -260,7 +286,19 @@ export default function Classroom() {
 
         if (data.from === localPeerId.current) return; // ignore self-broadcast
 
-        if (data.type === 'peer-joined') {
+        if (data.type === 'request-join') {
+          if (role === 'teacher') {
+             setRequests(prev => [...prev, { from: data.from, name: data.name }]);
+          }
+        } 
+        else if (data.type === 'allow-join' && data.to === localPeerId.current) {
+          console.log("Admission Approved! Joining P2P stream...");
+          wsRef.current.send(JSON.stringify({
+             type: 'peer-joined',
+             from: localPeerId.current
+          }));
+        }
+        else if (data.type === 'peer-joined') {
           await createOffer(data.from, currentStream);
         } 
         else if (data.type === 'offer' && data.to === localPeerId.current) {
@@ -379,7 +417,25 @@ export default function Classroom() {
   };
 
   return (
-    <div className="classroom-container container-fluid d-flex flex-column py-4 px-4">
+    <div className="classroom-container container-fluid d-flex flex-column py-4 px-4 position-relative">
+      
+      {/* Knock Requests Notification */}
+      {requests.length > 0 && (
+         <div className="position-fixed top-0 start-50 translate-middle-x mt-3 d-flex flex-column gap-2" style={{ zIndex: 2000 }}>
+            {requests.map((req, index) => (
+               <div key={index} className="glass-panel p-3 d-flex align-items-center gap-3 shadow-lg" style={{ width: '400px', background: 'rgba(15,20,28,0.95)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px' }}>
+                  <div className="flex-grow-1 text-start">
+                     <span className="fw-bold">{req.name}</span> <span className="text-secondary small">wants to join</span>
+                  </div>
+                  <div className="d-flex gap-2">
+                     <button className="btn btn-sm btn-outline-secondary rounded-pill px-3" onClick={() => handleReject(req)}>Deny</button>
+                     <button className="btn btn-sm btn-primary rounded-pill px-3" onClick={() => handleApprove(req)}>Admit</button>
+                  </div>
+               </div>
+            ))}
+         </div>
+      )}
+
       <header className="d-flex justify-content-between align-items-center mb-4">
         <h3 className="m-0 fw-bold d-flex align-items-center">
           <span>Classroom</span>
