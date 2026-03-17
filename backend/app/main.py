@@ -2,6 +2,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from .routes.rooms import router as rooms_router
+from .routes.attendance import router as attendance_router
 from .websocket.signaling import manager
 import json
 
@@ -31,6 +32,7 @@ app.add_middleware(
 
 # Register REST Routes
 app.include_router(rooms_router)
+app.include_router(attendance_router)
 
 @app.get("/")
 def home():
