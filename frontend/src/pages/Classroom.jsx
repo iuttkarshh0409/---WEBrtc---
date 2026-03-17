@@ -163,10 +163,6 @@ export default function Classroom() {
          console.log(`[RTCPeer] ${peerId} Signaling: ${pc.signalingState}`);
       };
 
-      pc.onicecandidateerror = (event) => {
-         console.error(`[RTCPeer] ICE Candidate Error with ${peerId}:`, event.url, event.errorCode, event.errorText);
-      };
-
       return pc;
     };
 
