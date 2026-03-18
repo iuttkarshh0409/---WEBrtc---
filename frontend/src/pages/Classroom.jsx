@@ -803,8 +803,8 @@ export default function Classroom() {
             </h6>
             <div className="d-flex flex-wrap gap-2" style={{ maxHeight: '120px', overflowY: 'auto' }}>
               {participants.map((p, i) => (
-                <div key={i} className="d-flex align-items-center gap-2 px-3 py-1 rounded-pill" style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.04)', transition: 'all 0.2s' }}>
-                  <div className="bg-primary rounded-circle" style={{ width: '8px', height: '8px' }}></div>
+                <div key={i} className="d-flex align-items-center gap-2 px-3 py-1 rounded-1" style={{ backgroundColor: '#1E293B', border: '1px solid rgba(255, 255, 255, 0.04)', transition: 'all 0.2s' }}>
+                  <div className="bg-primary rounded-circle" style={{ width: '6px', height: '6px' }}></div>
                   <span className="small fw-bold text-white">{p}</span>
                 </div>
               ))}
@@ -873,8 +873,8 @@ export default function Classroom() {
                                  <div className="text-secondary" style={{ fontSize: '0.65rem' }}>{statusText}</div>
                               </div>
                               <div className="d-flex gap-2 align-items-center">
-                                 <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2">{activeMins}m</span>
-                                 <span className={`badge ${isPresent ? 'bg-success' : 'bg-danger'} rounded-pill px-2`} style={{ fontSize: '0.65rem' }}>{isPresent ? 'Present' : 'Absent'}</span>
+                                 <span className="badge bg-success bg-opacity-10 text-success rounded-1 px-2" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{activeMins}m</span>
+                                 <span className={`badge ${isPresent ? 'bg-success' : 'bg-danger'} rounded-1 px-2`} style={{ fontSize: '0.65rem' }}>{isPresent ? 'Present' : 'Absent'}</span>
                               </div>
                            </div>
                          );
