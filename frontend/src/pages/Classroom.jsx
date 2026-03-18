@@ -859,26 +859,39 @@ export default function Classroom() {
                {remoteStreams.length === 0 ? (
                   <div className="text-white-50 small text-center my-3">No students logged yet.</div>
                ) : (
-                  <div className="d-flex flex-column gap-2" style={{ overflowY: 'auto' }}>
-                     {remoteStreams.map((s, i) => {
-                         const a = attendanceList.find(at => at.name === s.name) || { total_active_time: 0, status: 'inactive' };
-                         const activeMins = a.total_active_time ? Math.floor(a.total_active_time / 60) : 0;
-                         const isPresent = a.total_active_time >= 60;
-                         const statusText = a.status ? a.status.toUpperCase() : 'INACTIVE';
-                         
-                         return (
-                           <div key={i} className="d-flex justify-content-between align-items-center p-2 rounded-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.04)', transition: 'all 0.2s' }}>
-                              <div>
-                                 <div className="fw-bold small text-white">{s.name || `Participant ${s.peerId.slice(-4)}`}</div>
-                                 <div className="text-secondary" style={{ fontSize: '0.65rem' }}>{statusText}</div>
-                              </div>
-                              <div className="d-flex gap-2 align-items-center">
-                                 <span className="badge bg-success bg-opacity-10 text-success rounded-1 px-2" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{activeMins}m</span>
-                                 <span className={`badge ${isPresent ? 'bg-success' : 'bg-danger'} rounded-1 px-2`} style={{ fontSize: '0.65rem' }}>{isPresent ? 'Present' : 'Absent'}</span>
-                              </div>
-                           </div>
-                         );
-                      })}
+                  <div className="table-responsive flex-grow-1" style={{ overflowY: 'auto' }}>
+                     <table className="table table-dark table-sm table-borderless m-0 small">
+                        <thead>
+                          <tr className="text-secondary" style={{ fontSize: '0.70rem', fontFamily: "'IBM Plex Mono', monospace" }}>
+                            <th className="px-2">STUDENT</th>
+                            <th className="text-center">MINS</th>
+                            <th>STATUS</th>
+                            <th>JOIN</th>
+                            <th>LAST_SEEN</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                           {remoteStreams.map((s, i) => {
+                              const a = attendanceList.find(at => at.name === s.name) || { total_active_time: 0, status: 'inactive' };
+                              const activeMins = a.total_active_time ? Math.floor(a.total_active_time / 60) : 0;
+                              const statusText = a.status ? a.status.toUpperCase() : 'INACTIVE';
+                              const joinTimeStr = a.join_time ? new Date(a.join_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                              const lastSeenStr = a.last_seen ? new Date(a.last_seen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                              
+                              return (
+                                <tr key={i} className="text-white-50 align-middle" style={{ transition: 'color 0.2s', fontSize: '0.8rem' }}>
+                                   <td className="px-2 fw-medium text-white">{s.name || `Participant ${s.peerId.slice(-4)}`}</td>
+                                   <td className="text-center" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{activeMins}m</td>
+                                   <td>
+                                       <span className={`badge ${statusText === 'ACTIVE' ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'} rounded-1`} style={{ fontSize: '0.65rem' }}>{statusText}</span>
+                                   </td>
+                                   <td style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.70rem' }}>{joinTimeStr}</td>
+                                   <td style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.70rem' }}>{lastSeenStr}</td>
+                                </tr>
+                              );
+                           })}
+                        </tbody>
+                     </table>
                   </div>
                )}
             </div>

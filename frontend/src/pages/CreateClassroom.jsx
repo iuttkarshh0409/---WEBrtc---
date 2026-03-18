@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function CreateClassroom() {
   const [teacherName, setTeacherName] = useState('');
@@ -23,70 +23,67 @@ export default function CreateClassroom() {
       if (!res.ok) {
         throw new Error(data.detail || 'Failed to create classroom');
       }
-      // Navigate to room as teacher
       if (!data.room_id) {
          throw new Error('Server did not return a valid Room ID');
       }
       navigate(`/room/${data.room_id}?role=teacher&name=${encodeURIComponent(teacherName)}`);
     } catch (error) {
-      console.error('Failed to create room', error);
-      alert(`Failed to connect to backend at: ${backendUrl}`);
+       console.error('Failed to create room', error);
+       alert(`Failed to connect to backend at: ${backendUrl}`);
     } finally {
-      setLoading(false);
+       setLoading(false);
     }
   };
 
   return (
-    <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 px-3" style={{ backgroundColor: '#CFFFDC', fontFamily: "'Inter', sans-serif" }}>
-      <div className="bg-white p-4 rounded-4 border-0 shadow-lg" style={{ width: '100%', maxWidth: '400px' }}>
-        <h3 className="mb-4 text-center fw-bold text-dark d-flex align-items-center justify-content-center gap-2">
-          <i className="bi bi-plus-circle-fill text-success"></i> Create Classroom
-        </h3>
-        
-        <form onSubmit={handleCreate}>
-          <div className="mb-3">
-            <label className="form-label small text-secondary fw-bold">Classroom Title</label>
-            <input 
-              type="text" 
-              className="form-control bg-light border-0 p-2 text-dark" 
-              style={{ borderRadius: '10px' }}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., Physics 101"
-              required 
-            />
-          </div>
-          
-          <div className="mb-3">
-            <label className="form-label small text-secondary fw-bold">Teacher Name</label>
-            <input 
-              type="text" 
-              className="form-control bg-light border-0 p-2 text-dark" 
-              style={{ borderRadius: '10px' }}
-              value={teacherName}
-              onChange={(e) => setTeacherName(e.target.value)}
-              placeholder="e.g., Prof. ABC"
-              required 
-            />
-          </div>
+    <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 px-3" style={{ backgroundColor: '#0B0D12', color: '#94A3B8', fontFamily: "'IBM Plex Sans', sans-serif" }}>
+      <div className="p-4" style={{ backgroundColor: '#11141B', border: '1px solid rgba(255, 255, 255, 0.04)', borderRadius: '4px', width: '100%', maxWidth: '400px' }}>
+         <h6 className="mb-3 text-start fw-bold text-white d-flex align-items-center gap-2 pb-2 border-bottom" style={{ borderColor: 'rgba(255, 255, 255, 0.04)', fontSize: '0.95rem', fontFamily: "'IBM Plex Mono', monospace" }}>
+            <i className="bi bi-plus-circle-fill" style={{ color: '#06B6D4' }}></i> INITIALIZE_SESSION
+         </h6>
+         
+         <form onSubmit={handleCreate}>
+           <div className="mb-3">
+             <label className="form-label text-secondary" style={{ fontSize: '0.7rem', fontFamily: "'IBM Plex Mono', monospace" }}>SESSION_TITLE</label>
+             <input 
+               type="text" 
+               className="form-control form-control-sm border-0 border-bottom text-white px-0 bg-transparent shadow-none" 
+               style={{ borderRadius: '0', borderColor: '#1E293B', fontSize: '0.85rem' }}
+               value={title}
+               onChange={(e) => setTitle(e.target.value)}
+               placeholder="e.g., Physics_101"
+               required 
+             />
+           </div>
+           
+           <div className="mb-3">
+             <label className="form-label text-secondary" style={{ fontSize: '0.7rem', fontFamily: "'IBM Plex Mono', monospace" }}>INSTRUCTOR_IDENTIFIER</label>
+             <input 
+               type="text" 
+               className="form-control form-control-sm border-0 border-bottom text-white px-0 bg-transparent shadow-none" 
+               style={{ borderRadius: '0', borderColor: '#1E293B', fontSize: '0.85rem' }}
+               value={teacherName}
+               onChange={(e) => setTeacherName(e.target.value)}
+               placeholder="e.g., Prof._ABC"
+               required 
+             />
+           </div>
 
-          <button type="submit" className="btn btn-success w-100 rounded-pill mt-3 fw-bold py-2 shadow-sm" style={{ backgroundColor: '#10B981', border: 'none' }} disabled={loading}>
-            {loading ? (
-               <div className="d-flex align-items-center justify-content-center gap-2">
-                  <span className="spinner-border spinner-border-sm"></span> Creating...
-               </div>
-            ) : 'Create & Join Room'}
-          </button>
-        </form>
+           <button type="submit" className="btn btn-sm w-100 text-white fw-bold d-flex align-items-center justify-content-center gap-1 mt-4" style={{ backgroundColor: '#0891B2', border: '1px solid #06B6D4', borderRadius: '4px', fontSize: '0.85rem' }} disabled={loading}>
+             {loading ? (
+                <div className="d-flex align-items-center justify-content-center gap-2">
+                   <span className="spinner-border spinner-border-sm" style={{ width: '12px', height: '12px' }}></span> DEPLOYING_...
+                </div>
+             ) : 'MOUNT_SESSION_NODE'}
+           </button>
+         </form>
 
-        <div className="text-center mt-3">
-           <a href="/dashboard" className="text-secondary small text-decoration-none hover-success" style={{ transition: 'all 0.2s' }}><i className="bi bi-arrow-left"></i> Back to Dashboard</a>
-        </div>
+         <div className="text-center mt-3 pt-2 border-top" style={{ borderColor: 'rgba(255, 255, 255, 0.03)' }}>
+            <Link to="/dashboard" className="text-secondary small text-decoration-none" style={{ fontSize: '0.75rem', fontFamily: "'IBM Plex Mono', monospace" }}>
+               <i className="bi bi-arrow-left"></i> BACK_TO_CONSOLE
+            </Link>
+         </div>
       </div>
-
-      <style>{`
-         .hover-success:hover { color: #10B981 !important; }
-      `}</style>
     </div>
   );
 }
