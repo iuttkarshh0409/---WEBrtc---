@@ -37,50 +37,46 @@ export default function CreateClassroom() {
   };
 
   return (
-    <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 px-3" style={{ backgroundColor: '#CFFFDC', fontFamily: "'Inter', sans-serif" }}>
-      <div className="bg-white p-4 rounded-4 border-0 shadow-lg" style={{ width: '100%', maxWidth: '400px' }}>
-        <h3 className="mb-4 text-center fw-bold text-dark d-flex align-items-center justify-content-center gap-2">
-          <i className="bi bi-plus-circle-fill text-success"></i> Create Classroom
-        </h3>
+    <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 px-3" style={{ backgroundColor: '#1C1F24', color: '#E2E8F0', fontFamily: "'Public Sans', system-ui, sans-serif" }}>
+      <div className="p-4" style={{ width: '100%', maxWidth: '400px', background: '#15181C', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '4px' }}>
+        <h6 className="mb-4 text-center fw-bold text-light d-flex align-items-center justify-content-center gap-2">
+          <i className="bi bi-plus-circle text-info"></i> SESSION_CREATION
+        </h6>
         
         <form onSubmit={handleCreate}>
-          <div className="mb-3">
-            <label className="form-label small text-secondary fw-bold">Classroom Title</label>
+          <div className="mb-3 text-start">
+            <label className="form-label small text-secondary fw-bold mb-1">SESSION_TITLE</label>
             <input 
               type="text" 
-              className="form-control bg-light border-0 p-2 text-dark" 
-              style={{ borderRadius: '10px' }}
+              className="form-control form-control-sm bg-transparent border-secondary text-light shadow-none" 
+              style={{ borderRadius: '2px' }}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., Physics 101"
+              placeholder="e.g. CORE_MODULE_101"
               required 
             />
           </div>
           
-          <div className="mb-3">
-            <label className="form-label small text-secondary fw-bold">Teacher Name</label>
+          <div className="mb-4 text-start">
+            <label className="form-label small text-secondary fw-bold mb-1">INSTRUCTOR_NAME</label>
             <input 
               type="text" 
-              className="form-control bg-light border-0 p-2 text-dark" 
-              style={{ borderRadius: '10px' }}
+              className="form-control form-control-sm bg-transparent border-secondary text-light shadow-none" 
+              style={{ borderRadius: '2px' }}
               value={teacherName}
               onChange={(e) => setTeacherName(e.target.value)}
-              placeholder="e.g., Prof. ABC"
+              placeholder="Enter official identifier..."
               required 
             />
           </div>
 
-          <button type="submit" className="btn btn-success w-100 rounded-pill mt-3 fw-bold py-2 shadow-sm" style={{ backgroundColor: '#10B981', border: 'none' }} disabled={loading}>
-            {loading ? (
-               <div className="d-flex align-items-center justify-content-center gap-2">
-                  <span className="spinner-border spinner-border-sm"></span> Creating...
-               </div>
-            ) : 'Create & Join Room'}
+          <button type="submit" className="btn btn-sm btn-info text-dark w-100 fw-bold py-2" style={{ borderRadius: '3px', background: '#38BDF8', border: 'none' }} disabled={loading}>
+            {loading ? 'INITIALIZING...' : 'CREATE_SESSION'}
           </button>
         </form>
 
-        <div className="text-center mt-3">
-           <a href="/dashboard" className="text-secondary small text-decoration-none hover-success" style={{ transition: 'all 0.2s' }}><i className="bi bi-arrow-left"></i> Back to Dashboard</a>
+        <div className="text-center mt-3 pt-2" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.03)' }}>
+           <a href="/dashboard" className="text-secondary small text-decoration-none" style={{ fontSize: '0.8rem' }}><i className="bi bi-chevron-left"></i> RETURN_TO_HUB</a>
         </div>
       </div>
 

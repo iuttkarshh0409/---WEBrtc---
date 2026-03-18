@@ -41,59 +41,59 @@ export default function Dashboard() {
   const activeRooms = rooms.filter(r => r.title && r.teacher_name && r.is_active);
 
   return (
-    <div className="min-vh-100 text-dark px-4 px-md-5 py-4" style={{ backgroundColor: '#CFFFDC', fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-vh-100 px-4 px-md-5 py-4" style={{ backgroundColor: '#1C1F24', color: '#E2E8F0', fontFamily: "'Public Sans', system-ui, sans-serif" }}>
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-4 pb-3" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
          <div>
-            <h4 className="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
-              <i className="bi bi-layout-text-window-reverse text-success"></i> Classroom Hub
+            <h4 className="fw-bold mb-1 d-flex align-items-center gap-2" style={{ color: '#F8FAFC' }}>
+              <i className="bi bi-layout-text-window-reverse text-info"></i> SESSION_HUB
             </h4>
-            <p className="text-secondary small mb-0">
-               {activeRooms.length === 0 ? "You have no active classes." : `Welcome back! You have ${activeRooms.length} active live session${activeRooms.length > 1 ? 's' : ''}.`}
+            <p className="text-secondary small mb-0 mono-metric">
+               {activeRooms.length === 0 ? "NO LIVE SESSIONS DETECTED" : `SYSTEM ONLINE: ${activeRooms.length} ACTIVE STREAM${activeRooms.length > 1 ? 'S' : ''}`}
             </p>
          </div>
          <div className="d-flex gap-2">
-            <Link to="/join" className="btn btn-outline-secondary rounded-pill px-3 py-2 fs-6 fw-bold d-flex align-items-center gap-2">
+            <Link to="/join" className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" style={{ borderRadius: '3px', border: '1px solid rgba(255,255,255,0.1)', color: '#94A3B8' }}>
                <i className="bi bi-door-open-fill"></i> Manual Join
             </Link>
-            <Link to="/create" className="btn btn-success rounded-pill px-3 py-2 fs-6 fw-bold d-flex align-items-center gap-2" style={{ backgroundColor: '#10B981', border: 'none', boxShadow: '0 4px 6px rgba(16, 185, 129, 0.1)' }}>
+            <Link to="/create" className="btn btn-sm btn-info text-dark fw-bold d-flex align-items-center gap-2" style={{ borderRadius: '3px', background: '#38BDF8', border: 'none' }}>
                <i className="bi bi-plus-lg"></i> Create Session
             </Link>
          </div>
       </div>
 
-      {/* Pill Filters */}
-      <div className="d-flex gap-2 mb-4">
-         <button className="btn btn-sm btn-success rounded-pill px-3 fw-bold" style={{ backgroundColor: '#10B981', border: 'none' }}>All Classes</button>
-         <button className="btn btn-sm btn-outline-secondary rounded-pill px-3">Live Now</button>
+      {/* Analytical Filters */}
+      <div className="d-flex gap-1 mb-4">
+         <button className="btn btn-sm btn-info text-dark fw-bold px-3 d-flex align-items-center gap-1" style={{ borderRadius: '3px', background: '#38BDF8', border: 'none', fontSize: '0.75rem' }}>ALL_GROUPS</button>
+         <button className="btn btn-sm btn-outline-secondary px-3" style={{ borderRadius: '3px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.75rem', color: '#94A3B8' }}>FILTER_LIVE</button>
       </div>
 
       {/* Main Grid Feed */}
       {loading ? (
-         <div className="text-center text-secondary py-5">Loading live classrooms...</div>
+         <div className="text-center text-secondary py-5 mono-metric">Resolving metrics...</div>
       ) : activeRooms.length === 0 ? (
-         <div className="text-center text-secondary py-5 bg-white rounded-4 border border-light shadow-sm">You have no active classes.</div>
+         <div className="text-center text-secondary py-5 bg-transparent" style={{ border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '4px' }}>No live sessions detected.</div>
       ) : (
-         <div className="row g-4">
+         <div className="row g-3">
             {activeRooms.map((r, i) => (
               <div key={i} className="col-12 col-md-6 col-lg-4">
-                 <div className="card border-0 rounded-4 bg-white p-4 h-100 shadow-sm" style={{ transition: 'all 0.2s' }}>
-                    <div className="d-flex justify-content-between align-items-start mb-3">
-                       <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-2 d-flex align-items-center gap-1" style={{ fontSize: '0.7rem' }}>
-                          <span className="bg-success rounded-circle blink" style={{ width: '6px', height: '6px' }}></span> LIVE
+                 <div className="p-3 h-100 d-flex flex-column" style={{ background: '#15181C', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '4px' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                       <span className="badge bg-transparent d-flex align-items-center gap-1 p-0" style={{ fontSize: '0.7rem', color: '#14B8A6', fontWeight: 'bold' }}>
+                          <span className="bg-teal rounded-circle blink" style={{ width: '6px', height: '6px', backgroundColor: '#14B8A6' }}></span> STATUS // LIVE
                        </span>
                     </div>
 
-                    <h5 className="fw-bold mb-2 text-dark text-truncate" title={r.title}>{r.title}</h5>
-                    <p className="text-secondary small mb-3">Prof. {r.teacher_name}</p>
+                    <h6 className="fw-bold mb-1 text-truncate" style={{ color: '#F8FAFC' }} title={r.title}>{r.title.toUpperCase()}</h6>
+                    <p className="text-secondary small mb-3">INSTRUCTOR: {r.teacher_name}</p>
 
-                    <div className="mt-auto pt-3 border-top border-light d-flex justify-content-end align-items-center">
+                    <div className="mt-auto pt-2 d-flex justify-content-end align-items-center" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.03)' }}>
                        <button 
                          onClick={() => { setSelectedRoom(r); setShowModal(true); setJoinName(''); setJoinRole('student'); }} 
-                         className="btn btn-sm btn-success rounded-pill px-3 fw-bold d-flex align-items-center gap-1"
-                         style={{ backgroundColor: '#10B981', border: 'none' }}
+                         className="btn btn-sm btn-outline-info d-flex align-items-center gap-1"
+                         style={{ borderRadius: '3px', fontSize: '0.8rem', color: '#38BDF8' }}
                        >
-                         Join Stream <i className="bi bi-arrow-right-short fs-5"></i>
+                         ACCESS_STREAM <i className="bi bi-chevron-right"></i>
                        </button>
                     </div>
                  </div>
@@ -104,28 +104,41 @@ export default function Dashboard() {
 
       {/* Join Overlay Modal */}
       {showModal && (
-        <div className="modal-backdrop d-flex align-items-center justify-content-center" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', zIndex: 1100, backdropFilter: 'blur(4px)' }}>
-           <div className="bg-white p-4 rounded-4 border-0 shadow-lg" style={{ width: '90%', maxWidth: '400px' }}>
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                 <h5 className="m-0 fw-bold text-dark">Join: {selectedRoom?.title}</h5>
-                 <button className="btn-close" onClick={() => setShowModal(false)}></button>
+        <div className="modal-backdrop d-flex align-items-center justify-content-center" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(5, 5, 5, 0.75)', zIndex: 1100 }}>
+           <div className="p-4" style={{ width: '90%', maxWidth: '400px', background: '#15181C', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '4px' }}>
+              <div className="d-flex justify-content-between align-items-center mb-3 pb-2" style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                 <h6 className="m-0 fw-bold text-light">SESSION_JOIN: {selectedRoom?.title.toUpperCase()}</h6>
+                 <button className="btn btn-sm btn-link text-secondary p-0" onClick={() => setShowModal(false)}><i className="bi bi-x-lg"></i></button>
               </div>
-              
+
               <div className="mb-3 text-start">
-                 <label className="form-label small text-secondary fw-bold">Your Name</label>
-                 <input type="text" className="form-control bg-light border-0 p-2 text-dark" style={{ borderRadius: '10px' }} value={joinName} onChange={e => setJoinName(e.target.value)} placeholder="Enter name" required />
+                 <label className="form-label small text-secondary fw-bold mb-1">PARTICIPANT_NAME</label>
+                 <input 
+                   type="text" 
+                   className="form-control form-control-sm bg-transparent border-secondary text-light shadow-none" 
+                   style={{ borderRadius: '2px' }}
+                   value={joinName} 
+                   onChange={(e) => setJoinName(e.target.value)} 
+                   placeholder="Enter formal identification..."
+                 />
               </div>
+
               <div className="mb-4 text-start">
-                 <label className="form-label small text-secondary fw-bold">Choose Role</label>
-                 <select className="form-select bg-light border-0 p-2 text-dark" style={{ borderRadius: '10px' }} value={joinRole} onChange={e => setJoinRole(e.target.value)}>
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher (Host)</option>
+                 <label className="form-label small text-secondary fw-bold mb-1">ACCESS_ROLE</label>
+                 <select 
+                   className="form-select form-select-sm bg-transparent border-secondary text-light shadow-none" 
+                   style={{ borderRadius: '2px' }}
+                   value={joinRole} 
+                   onChange={(e) => setJoinRole(e.target.value)}
+                 >
+                    <option value="student" style={{ background: '#181B20' }}>Student</option>
+                    <option value="teacher" style={{ background: '#181B20' }}>Teacher (Host)</option>
                  </select>
               </div>
 
-              <div className="d-flex gap-2 mt-4">
-                 <button onClick={() => setShowModal(false)} className="btn btn-outline-secondary rounded-pill flex-grow-1">Cancel</button>
-                 <button onClick={handleJoinClass} className="btn btn-success rounded-pill flex-grow-1 fw-bold" style={{ backgroundColor: '#10B981', border: 'none' }}>Join</button>
+              <div className="d-flex gap-2">
+                 <button onClick={() => setShowModal(false)} className="btn btn-sm btn-outline-secondary w-50" style={{ borderRadius: '3px' }}>ABORT</button>
+                 <button onClick={handleJoinClass} className="btn btn-sm btn-info text-dark fw-bold w-50" style={{ borderRadius: '3px', background: '#38BDF8', border: 'none' }}>CONFIRM</button>
               </div>
            </div>
         </div>
