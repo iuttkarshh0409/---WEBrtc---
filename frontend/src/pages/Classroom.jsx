@@ -797,15 +797,14 @@ export default function Classroom() {
         {/* Sidebar */}
         <div className="col-12 col-lg-4 d-flex flex-column gap-3" style={{ maxHeight: 'calc(100vh - 120px)' }}>
           {/* Participants */}
-          <div className="glass-panel" style={{ borderRadius: '16px' }}>
-            <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-3 fw-bold d-flex align-items-center">
-              <i className="bi bi-people-fill me-2 text-primary"></i> People ({participants.length})
+          <div className="analytical-panel">
+            <h6 className="border-bottom border-light border-opacity-5 pb-2 mb-3 fw-bold small text-secondary d-flex align-items-center">
+              <i className="bi bi-people-fill me-2"></i> PEOPLE ({participants.length})
             </h6>
-            <div className="d-flex flex-wrap gap-2" style={{ maxHeight: '120px', overflowY: 'auto' }}>
+            <div className="d-flex flex-wrap gap-1" style={{ maxHeight: '120px', overflowY: 'auto' }}>
               {participants.map((p, i) => (
-                <div key={i} className="d-flex align-items-center gap-2 px-3 py-1 rounded-1" style={{ backgroundColor: '#1E293B', border: '1px solid rgba(255, 255, 255, 0.04)', transition: 'all 0.2s' }}>
-                  <div className="bg-primary rounded-circle" style={{ width: '6px', height: '6px' }}></div>
-                  <span className="small fw-bold text-white">{p}</span>
+                <div key={i} className="px-2 py-1" style={{ background: '#1C1F24', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '3px' }}>
+                   <span className="small text-secondary" style={{ fontSize: '0.75rem' }}>{p}</span>
                 </div>
               ))}
             </div>
@@ -813,20 +812,20 @@ export default function Classroom() {
 
           {/* Teacher Monitoring Panel */}
           {role === 'teacher' && (
-            <div className="glass-panel d-flex flex-column shadow-sm mb-3" style={{ height: '220px', overflow: 'hidden', borderRadius: '16px', padding: '1rem' }}>
-               <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-2 fw-bold text-danger d-flex align-items-center">
-                 <i className="bi bi-exclamation-octagon-fill me-2"></i> Student Monitoring Panel
+            <div className="analytical-panel d-flex flex-column" style={{ height: '220px', overflow: 'hidden' }}>
+               <h6 className="border-bottom border-light border-opacity-5 pb-2 mb-2 fw-bold text-danger small d-flex align-items-center">
+                 <i className="bi bi-exclamation-octagon-fill me-2"></i> SYSTEM_MONITORING
                </h6>
                {remoteStreams.length === 0 ? (
-                  <div className="text-white-50 small text-center my-3">No students connected yet.</div>
+                  <div className="text-secondary small text-center my-3">No active connections.</div>
                ) : (
-                  <div className="table-responsive flex-grow-1" style={{ overflowY: 'auto' }}>
-                     <table className="table table-dark table-sm table-borderless m-0 small">
+                  <div className="flex-grow-1" style={{ overflowY: 'auto' }}>
+                     <table className="analytical-table">
                         <thead>
-                          <tr className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                            <th className="px-2">Name</th>
-                            <th className="text-center">Count</th>
-                            <th>Last Reason</th>
+                          <tr>
+                            <th>STUDENT</th>
+                            <th className="text-center">ERR</th>
+                            <th>REASON</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -834,12 +833,12 @@ export default function Classroom() {
                               const v = violatingPeers[s.peerId] || { count: 0, lastReason: 'None' };
                               const isHigh = v.count > 2;
                               return (
-                                <tr key={i} className={isHigh ? 'text-danger fw-bold' : 'text-white-50'} style={{ transition: 'color 0.2s' }}>
-                                   <td className="px-2">{s.name || `Participant ${s.peerId.slice(-4)}`}</td>
-                                   <td className="text-center">
-                                      <span className={`badge ${isHigh ? 'bg-danger' : 'bg-secondary'} rounded-pill`} style={{ fontSize: '0.65rem' }}>{v.count}</span>
+                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                   <td>{s.name || `ID-${s.peerId.slice(-4).toUpperCase()}`}</td>
+                                   <td className="text-center mono-metric">
+                                      <span className={isHigh ? 'text-danger fw-bold' : 'text-secondary'}>{v.count}</span>
                                    </td>
-                                   <td className="text-truncate text-secondary" style={{ maxWidth: '100px', fontSize: '0.70rem' }} title={v.lastReason}>{v.lastReason || 'None'}</td>
+                                   <td className="text-truncate text-secondary" style={{ maxWidth: '100px', fontSize: '0.75rem' }} title={v.lastReason}>{v.lastReason || 'None'}</td>
                                 </tr>
                               );
                            })}
@@ -852,43 +851,43 @@ export default function Classroom() {
 
           {/* Teacher Attendance Panel */}
           {role === 'teacher' && (
-            <div className="glass-panel d-flex flex-column shadow-sm mb-3" style={{ height: '230px', overflow: 'hidden', borderRadius: '16px', padding: '1rem' }}>
-               <h6 className="border-bottom border-secondary border-opacity-10 pb-2 mb-2 fw-bold text-success d-flex align-items-center">
-                 <i className="bi bi-person-check-fill me-2"></i> Attendance Tracking
+            <div className="analytical-panel d-flex flex-column" style={{ height: '230px', overflow: 'hidden' }}>
+               <h6 className="border-bottom border-light border-opacity-5 pb-2 mb-2 fw-bold text-success small d-flex align-items-center">
+                 <i className="bi bi-person-check-fill me-2"></i> ATTENDANCE_TRACKING
                </h6>
                {remoteStreams.length === 0 ? (
-                  <div className="text-white-50 small text-center my-3">No students logged yet.</div>
+                  <div className="text-secondary small text-center my-3">No students connected.</div>
                ) : (
-                  <div className="table-responsive flex-grow-1" style={{ overflowY: 'auto' }}>
-                     <table className="table table-dark table-sm table-borderless m-0 small">
+                  <div className="flex-grow-1" style={{ overflowY: 'auto' }}>
+                     <table className="analytical-table">
                         <thead>
-                          <tr className="text-secondary" style={{ fontSize: '0.70rem', fontFamily: "'IBM Plex Mono', monospace" }}>
-                            <th className="px-2">STUDENT</th>
-                            <th className="text-center">MINS</th>
+                          <tr>
+                            <th>STUDENT</th>
+                            <th>MINS</th>
                             <th>STATUS</th>
                             <th>JOIN</th>
-                            <th>LAST_SEEN</th>
                           </tr>
                         </thead>
                         <tbody>
                            {remoteStreams.map((s, i) => {
-                              const a = attendanceList.find(at => at.name === s.name) || { total_active_time: 0, status: 'inactive' };
-                              const activeMins = a.total_active_time ? Math.floor(a.total_active_time / 60) : 0;
-                              const statusText = a.status ? a.status.toUpperCase() : 'INACTIVE';
-                              const joinTimeStr = a.join_time ? new Date(a.join_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
-                              const lastSeenStr = a.last_seen ? new Date(a.last_seen).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
-                              
-                              return (
-                                <tr key={i} className="text-white-50 align-middle" style={{ transition: 'color 0.2s', fontSize: '0.8rem' }}>
-                                   <td className="px-2 fw-medium text-white">{s.name || `Participant ${s.peerId.slice(-4)}`}</td>
-                                   <td className="text-center" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{activeMins}m</td>
-                                   <td>
-                                       <span className={`badge ${statusText === 'ACTIVE' ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'} rounded-1`} style={{ fontSize: '0.65rem' }}>{statusText}</span>
-                                   </td>
-                                   <td style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.70rem' }}>{joinTimeStr}</td>
-                                   <td style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.70rem' }}>{lastSeenStr}</td>
-                                </tr>
-                              );
+                               const a = attendanceList.find(at => at.name === s.name) || { total_active_time: 0, status: 'offline', joined_at: null };
+                               const activeMins = a.total_active_time ? Math.floor(a.total_active_time / 60) : 0;
+                               const statusText = a.status ? a.status.toUpperCase() : 'OFFLINE';
+                               const joinTime = a.joined_at ? new Date(a.joined_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--';
+                               
+                               return (
+                                 <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                    <td>{s.name || `ID-${s.peerId.slice(-4).toUpperCase()}`}</td>
+                                    <td className="mono-metric text-info">{activeMins}m</td>
+                                    <td>
+                                       <span className="small d-inline-flex align-items-center gap-1">
+                                          <span className={`rounded-circle ${statusText === 'ACTIVE' ? 'bg-success' : 'bg-secondary'}`} style={{ width: '6px', height: '6px' }}></span>
+                                          <span style={{ fontSize: '0.70rem', color: statusText === 'ACTIVE' ? '#14B8A6' : '#94A3B8' }}>{statusText}</span>
+                                       </span>
+                                    </td>
+                                    <td className="mono-metric text-secondary" style={{ fontSize: '0.75rem' }}>{joinTime}</td>
+                                 </tr>
+                               );
                            })}
                         </tbody>
                      </table>
@@ -898,8 +897,8 @@ export default function Classroom() {
           )}
 
           {/* Chat Panel */}
-          <div className="glass-panel flex-grow-1 d-flex flex-column overflow-hidden" style={{ minHeight: '420px' }}>
-            <h6 className="border-bottom border-secondary border-opacity-25 pb-3 mb-3 fw-bold">Room Chat</h6>
+          <div className="analytical-panel flex-grow-1 d-flex flex-column overflow-hidden" style={{ minHeight: '380px', marginBottom: '0' }}>
+            <h6 className="border-bottom border-light border-opacity-5 pb-2 mb-3 fw-bold small text-secondary">ROOM_CHAT</h6>
             
             <div className="chat-container flex-grow-1 p-2 mb-3">
               {messages.length === 0 ? (
